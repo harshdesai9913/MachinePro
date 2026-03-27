@@ -1,17 +1,17 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --bg: #d0d0d0;
-    --surface: #c0c0c0;
-    --surface2: #b8b8b8;
-    --surface3: #aaa;
-    --border: #999;
-    --border2: #888;
-    --text: #1a1a1a;
-    --text2: #333;
-    --text3: #555;
-    --white: #111;
-    --black: #fff;
+    --bg: #0f0a00;
+    --surface: #1a1200;
+    --surface2: #261c05;
+    --surface3: #33260a;
+    --border: #4a3510;
+    --border2: #5c4418;
+    --text: #f0ddb0;
+    --text2: #c8a060;
+    --text3: #8a6530;
+    --white: #f97316;
+    --black: #0a0600;
     --red: #e53935;
     --red-bg: rgba(229,57,53,.12);
     --red-border: rgba(229,57,53,.3);
@@ -92,7 +92,7 @@ select option { background: var(--surface); color: var(--text); }
 .btn { padding: 9px 18px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); border-radius: var(--radius); cursor: pointer; font-family: var(--font-sans); font-size: .8rem; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
 .btn:hover { background: var(--surface3); border-color: var(--text3); }
 .btn-primary { background: var(--white); color: var(--black); border-color: var(--white); }
-.btn-primary:hover { background: #333; border-color: #333; }
+.btn-primary:hover { background: #c45d0a; border-color: #c45d0a; }
 .btn-sm { padding: 5px 10px; font-size: .72rem; }
 
 /* CHIPS */
