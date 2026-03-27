@@ -24,17 +24,17 @@
     --radius-lg: 10px;
 }
 
-/* Keep sidebar dark */
+/* Sidebar */
 .sidebar {
-    --surface: #262c32;
-    --surface2: #2e3439;
-    --surface3: #373e44;
-    --border: #424a52;
-    --text: #f5ede0;
-    --text2: #c8b090;
-    --text3: #8a7560;
-    background: #262c32;
-    border-right-color: #424a52;
+    --surface: #BFC6C4;
+    --surface2: #adb5b3;
+    --surface3: #9ca5a3;
+    --border: #9aadab;
+    --text: #1c2528;
+    --text2: #2e4040;
+    --text3: #445858;
+    background: #BFC6C4;
+    border-right-color: #9aadab;
 }
 
 html { font-size: 14px; }
@@ -65,10 +65,10 @@ a { text-decoration: none; color: inherit; }
 
 /* MAIN */
 .main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.topbar { padding: 16px 28px; border-bottom: 1px solid #424a52; display: flex; align-items: center; justify-content: space-between; background: #262c32; min-height: 60px; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid #9aadab; display: flex; align-items: center; justify-content: space-between; background: #BFC6C4; min-height: 60px; }
 .topbar h1 { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; color: var(--white); letter-spacing: 1px; }
 .topbar-right { display: flex; align-items: center; gap: 12px; }
-.topbar-badge { font-size: .7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-family: var(--font-mono); letter-spacing: 1px; background: #373e44; color: #c8b090; border: 1px solid #424a52; }
+.topbar-badge { font-size: .7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-family: var(--font-mono); letter-spacing: 1px; background: #9aadab; color: #1c2528; border: 1px solid #8a9e9c; }
 .content { flex: 1; overflow-y: auto; padding: 24px 28px; }
 
 /* CARDS */

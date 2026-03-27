@@ -6,28 +6,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — MachinePro</title>
+    <title>Login — SUSHA PRODUCTION TRACKER</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'IBM Plex Sans', sans-serif; background: #1c2025; color: #f5ede0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: #262c32; border: 1px solid #424a52; border-radius: 10px; padding: 40px; width: 380px; max-width: 90%; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: #BFC6C4; color: #1c2528; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: #EAEFEF; border: 1px solid #a8b4b2; border-radius: 10px; padding: 40px; width: 380px; max-width: 90%; }
         .login-logo { display: block; margin: 0 auto 16px; height: 60px; object-fit: contain; }
         .login-brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.3rem; letter-spacing: 2px; color: #E89D33; text-align: center; margin-bottom: 6px; }
-        .login-sub { text-align: center; font-size: .75rem; color: #8a7560; margin-bottom: 30px; }
+        .login-sub { text-align: center; font-size: .75rem; color: #607070; margin-bottom: 30px; }
         .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: 1.5px; color: #8a7560; font-weight: 600; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 10px 12px; background: #2e3439; border: 1px solid #424a52; border-radius: 6px; color: #f5ede0; font-family: 'IBM Plex Sans', sans-serif; font-size: .9rem; outline: none; }
+        .form-group label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: 1.5px; color: #3d5555; font-weight: 600; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 10px 12px; background: #ffffff; border: 1px solid #ccd6d6; border-radius: 6px; color: #1c2528; font-family: 'IBM Plex Sans', sans-serif; font-size: .9rem; outline: none; }
         .form-group input:focus { border-color: #E89D33; }
         .btn-login { width: 100%; padding: 12px; background: #E89D33; color: #1a1208; border: 1px solid #E89D33; border-radius: 6px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: .9rem; font-weight: 600; letter-spacing: 1px; margin-top: 8px; }
         .btn-login:hover { background: #c47d1a; border-color: #c47d1a; }
-        .error-msg { background: rgba(229,57,53,.12); border: 1px solid rgba(229,57,53,.3); color: #e53935; padding: 10px 14px; border-radius: 6px; font-size: .82rem; margin-bottom: 16px; text-align: center; }
+        .error-msg { background: rgba(229,57,53,.1); border: 1px solid rgba(229,57,53,.3); color: #c62828; padding: 10px 14px; border-radius: 6px; font-size: .82rem; margin-bottom: 16px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="login-box">
         <img src="https://sushaindia.in/wp-content/uploads/2022/02/logo-image.png" alt="Susha India" class="login-logo" />
-        <div class="login-brand">MACHINEPRO</div>
+        <div class="login-brand">SUSHA PRODUCTION TRACKER</div>
         <div class="login-sub">Production Tracker — Sign In</div>
 
         @if (ViewBag.Error != null)
