@@ -1,23 +1,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --bg: #0f0a00;
-    --surface: #1a1200;
-    --surface2: #261c05;
-    --surface3: #33260a;
-    --border: #4a3510;
-    --border2: #5c4418;
-    --text: #f0ddb0;
-    --text2: #c8a060;
-    --text3: #8a6530;
-    --white: #f97316;
-    --black: #0a0600;
+    --bg: #1c2025;
+    --surface: #262c32;
+    --surface2: #2e3439;
+    --surface3: #373e44;
+    --border: #424a52;
+    --border2: #525c65;
+    --text: #f5ede0;
+    --text2: #c8b090;
+    --text3: #8a7560;
+    --white: #E89D33;
+    --black: #1a1208;
     --red: #e53935;
     --red-bg: rgba(229,57,53,.12);
     --red-border: rgba(229,57,53,.3);
-    --green: #43a047;
-    --green-bg: rgba(67,160,71,.12);
-    --green-border: rgba(67,160,71,.3);
+    --green: #0693e3;
+    --green-bg: rgba(6,147,227,.12);
+    --green-border: rgba(6,147,227,.3);
     --font-mono: 'JetBrains Mono', monospace;
     --font-sans: 'IBM Plex Sans', sans-serif;
     --radius: 6px;
@@ -92,7 +92,7 @@ select option { background: var(--surface); color: var(--text); }
 .btn { padding: 9px 18px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); border-radius: var(--radius); cursor: pointer; font-family: var(--font-sans); font-size: .8rem; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
 .btn:hover { background: var(--surface3); border-color: var(--text3); }
 .btn-primary { background: var(--white); color: var(--black); border-color: var(--white); }
-.btn-primary:hover { background: #c45d0a; border-color: #c45d0a; }
+.btn-primary:hover { background: #c47d1a; border-color: #c47d1a; }
 .btn-sm { padding: 5px 10px; font-size: .72rem; }
 
 /* CHIPS */
