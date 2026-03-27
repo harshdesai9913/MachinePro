@@ -1,0 +1,69 @@
+@model FinishedViewModel
+@{ ViewData["Title"] = "FINISHED JOBS"; }
+
+@{
+    var successMsg = TempData["Success"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--green);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">
+        ✓ @successMsg
+    </div>
+}
+
+<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    @{ ViewBag.FilterAction = "Finished"; }
+    @await Html.PartialAsync("_FilterBar")
+    <form method="get" asp-action="Finished" style="display:inline-flex;gap:6px">
+        <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
+        <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
+        <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
+    </form>
+</div>
+
+<div class="table-wrap">
+    <div class="table-header">
+        <h2>COMPLETED JOBS</h2>
+        <span class="count">@Model.Jobs.Count jobs</span>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Description</th><th>Qty</th><th>Inward Date</th><th>Completed Date</th>@if(User.IsInRole("Manager")){<th>Action</th>}</tr>
+            </thead>
+            <tbody>
+                @if (!Model.Jobs.Any())
+                {
+                    <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:30px">No finished jobs yet.</td></tr>
+                }
+                else
+                {
+                    @foreach (var j in Model.Jobs)
+                    {
+                        <tr class="row-green">
+                            <td class="serial-cell">@j.Serial</td>
+                            <td>@j.Customer</td>
+                            <td>@j.Model</td>
+                            <td>@j.Drawing</td>
+                            <td style="font-size:.78rem">@(j.DrawingDescription ?? "—")</td>
+                            <td>@j.Qty</td>
+                            <td>@j.InwardDate</td>
+                            <td style="font-family:var(--font-mono);font-size:.78rem">@j.CompletedDate</td>
+                            @if(User.IsInRole("Manager"))
+                            {
+                            <td>
+                                <form method="post" asp-action="ReturnToProduction" style="display:inline">
+                                    <input type="hidden" name="id" value="@j.Id" />
+                                    <button type="submit" onclick="return confirm('Return @j.Serial to production? It will resume from the last unfinished step.')"
+                                            class="btn btn-sm" style="font-size:.6rem;white-space:nowrap">↩ Return</button>
+                                </form>
+                            </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,123 @@
+@model ModuleViewModel
+@{ ViewData["Title"] = $"{Model.ModuleName.ToUpper()} MODULE"; }
+
+<div style="margin-bottom:16px">
+    @{ ViewBag.FilterAction = "Module"; ViewBag.FilterExtra = new Dictionary<string, string> { { "name", Model.ModuleName } }; }
+    @await Html.PartialAsync("_FilterBar")
+</div>
+
+<div class="table-wrap">
+    <div class="table-header">
+        <h2>@Model.ModuleName.ToUpper() JOBS</h2>
+        <span class="count">@Model.Jobs.Count entries</span>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Serial</th><th>Customer</th><th>Model</th><th>Total Qty</th><th>Step</th>
+                    <th>@Model.ModuleName #</th><th>Done</th><th>Remaining</th><th>Record Qty</th><th>Status</th><th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var mj in Model.Jobs)
+                {
+                    var done = mj.FinishedQty ?? 0;
+                    var remaining = mj.Qty - done;
+                    var pct = mj.Qty > 0 ? (int)((double)done / mj.Qty * 100) : 0;
+                    <tr>
+                        <td class="serial-cell">@mj.Serial</td>
+                        <td>@mj.Customer</td>
+                        <td>@mj.Model</td>
+                        <td>@mj.Qty</td>
+                        <td>
+                            <span class="chip @(mj.IsFinished ? "chip-green" : "chip-red")">Step @(mj.StepIndex + 1)</span>
+                        </td>
+
+                        <!-- Machine Number -->
+                        <td>
+                            @if (mj.IsFinished)
+                            {
+                                <span style="font-family:var(--font-mono);font-size:.8rem">@Model.ModuleName #@mj.MachineNumber</span>
+                            }
+                            else if (mj.ModuleEntryId.HasValue)
+                            {
+                                <form method="post" asp-action="SetMachine" style="display:inline">
+                                    <input type="hidden" name="moduleEntryId" value="@mj.ModuleEntryId" />
+                                    <input type="hidden" name="moduleName" value="@Model.ModuleName" />
+                                    <select name="machineNumber" onchange="this.form.submit()">
+                                        <option value="">—</option>
+                                        @for (int i = 1; i <= Model.MachineCount; i++)
+                                        {
+                                            <option value="@i" selected="@(mj.MachineNumber == i.ToString())">@Model.ModuleName #@i</option>
+                                        }
+                                    </select>
+                                </form>
+                            }
+                        </td>
+
+                        <!-- Done -->
+                        <td style="font-family:var(--font-mono);font-weight:600;color:@(mj.IsFinished ? "var(--green)" : "var(--text)")">
+                            @done
+                            <span style="font-size:.65rem;color:var(--text3);font-weight:400"> / @mj.Qty</span>
+                        </td>
+
+                        <!-- Remaining -->
+                        <td style="font-family:var(--font-mono);font-weight:600;color:@(remaining == 0 ? "var(--green)" : "var(--red)")">
+                            @remaining
+                        </td>
+
+                        <!-- Record Qty -->
+                        <td>
+                            @if (mj.IsFinished)
+                            {
+                                <span style="font-family:var(--font-mono);font-size:.75rem;color:var(--green)">✓ Complete</span>
+                            }
+                            else
+                            {
+                                <form method="post" asp-action="RecordQty" style="display:inline-flex;align-items:center;gap:4px">
+                                    <input type="hidden" name="JobId" value="@mj.JobId" />
+                                    <input type="hidden" name="ModuleName" value="@Model.ModuleName" />
+                                    <input type="hidden" name="StepIndex" value="@mj.StepIndex" />
+                                    <input type="number" name="RecordQty" min="1" max="@remaining" placeholder="Qty"
+                                           style="width:60px;padding:5px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:.8rem;text-align:center" />
+                                    <button type="submit" class="btn btn-sm btn-primary" style="padding:4px 10px;font-size:.65rem;white-space:nowrap">
+                                        Record
+                                    </button>
+                                </form>
+                            }
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            @if (mj.IsFinished)
+                            {
+                                <span class="chip chip-green">DONE</span>
+                            }
+                            else if (done > 0)
+                            {
+                                <span class="chip chip-red">@pct%</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text3);font-size:.75rem;font-family:var(--font-mono)">PENDING</span>
+                            }
+                        </td>
+
+                        <!-- Last Updated -->
+                        <td>
+                            @if (!string.IsNullOrEmpty(mj.FinishedDate))
+                            {
+                                <span class="finished-date">@mj.FinishedDate</span>
+                            }
+                            else
+                            {
+                                <span class="not-finished">—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

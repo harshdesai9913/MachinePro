@@ -1,0 +1,81 @@
+@model RequestsPageViewModel
+@{ ViewData["Title"] = "SUBMIT REQUEST"; }
+
+<div class="table-wrap" style="padding:24px">
+    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:20px;letter-spacing:1px">NEW PART REQUEST</h2>
+    <form method="post" asp-action="SubmitRequest">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Serial Number</label>
+                <input value="@Model.NextSerial" readonly />
+            </div>
+            <div class="form-group">
+                <label>Customer Name</label>
+                <select name="Customer" required>
+                    <option value="">— Select Customer —</option>
+                    @foreach (var c in Model.Customers)
+                    {
+                        <option value="@c.CustomerName">@c.CustomerName</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Customer Model</label>
+                <select name="Model" required>
+                    <option value="">— Select Model —</option>
+                    @foreach (var m in Model.Models)
+                    {
+                        <option value="@m.ModelName">@m.ModelName</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Drawing Number</label>
+                <input name="Drawing" placeholder="e.g. DWG-2201" required />
+            </div>
+            <div class="form-group">
+                <label>Drawing Description</label>
+                <input name="DrawingDescription" placeholder="e.g. Engine block housing plate" />
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input name="Qty" type="number" min="1" placeholder="e.g. 12" required />
+            </div>
+            <div class="form-group">
+                <label>Inward Date</label>
+                <input value="@Model.Today" readonly />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+</div>
+
+<div style="margin-top:24px">
+    <div class="table-wrap">
+        <div class="table-header">
+            <h2>ALL REQUESTS</h2>
+            <span class="count">@Model.Jobs.Count entries</span>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Description</th><th>Qty</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var j in Model.Jobs)
+                    {
+                        <tr>
+                            <td class="serial-cell">@j.Serial</td>
+                            <td>@j.Customer</td>
+                            <td>@j.Model</td>
+                            <td>@j.Drawing</td>
+                            <td style="font-size:.78rem;color:var(--text2)">@(j.DrawingDescription ?? "—")</td>
+                            <td>@j.Qty</td>
+                            <td>@j.InwardDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

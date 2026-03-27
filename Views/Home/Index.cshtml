@@ -1,0 +1,32 @@
+@model DashboardViewModel
+@{ ViewData["Title"] = "DASHBOARD"; }
+
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="label">Total Parts in Shop</div>
+        <div class="value">@Model.TotalParts</div>
+        <div class="sub">@Model.TotalJobs active jobs</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Unassigned Machines</div>
+        <div class="value">@Model.Unassigned</div>
+        <div class="sub">Steps without machine #</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Pending Jobs</div>
+        <div class="value">@Model.Pending</div>
+        <div class="sub">Steps not yet finished</div>
+    </div>
+</div>
+
+<div class="section-title">MODULE BREAKDOWN</div>
+<div class="stat-row">
+    @foreach (var kv in Model.ModuleBreakdown)
+    {
+        <div class="stat-card">
+            <div class="label">@kv.Key</div>
+            <div class="value">@kv.Value.Total</div>
+            <div class="sub">✓ @kv.Value.Finished done · ⏳ @kv.Value.Pending pending · ⚠ @kv.Value.Unassigned unassigned</div>
+        </div>
+    }
+</div>

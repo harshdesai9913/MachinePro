@@ -1,0 +1,147 @@
+@model List<AppUser>
+@{ ViewData["Title"] = "USER MANAGEMENT"; }
+
+@{
+    var successMsg = TempData["Success"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--green);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">
+        ✓ @successMsg
+    </div>
+}
+
+<!-- ADD USER -->
+<div class="table-wrap" style="padding:24px;margin-bottom:24px">
+    <h2 style="font-family:var(--font-mono);font-size:.85rem;color:var(--white);margin-bottom:16px;letter-spacing:1px">ADD NEW USER</h2>
+    <form method="post" asp-action="AddUser" asp-controller="Account" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;min-width:140px">
+            <label>Full Name</label>
+            <input name="fullName" placeholder="e.g. Rajesh Kumar" required />
+        </div>
+        <div class="form-group" style="flex:1;min-width:120px">
+            <label>Username</label>
+            <input name="username" placeholder="e.g. rajesh1" required />
+        </div>
+        <div class="form-group" style="flex:1;min-width:120px">
+            <label>Password</label>
+            <input name="password" type="text" placeholder="e.g. pass123" required />
+        </div>
+        <div class="form-group" style="min-width:130px">
+            <label>Role</label>
+            <select name="role" required style="padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.85rem">
+                <option value="">— Select —</option>
+                <option value="Manager">Manager</option>
+                <option value="Planner">Planner</option>
+                <option value="Technician">Technician</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-bottom:0">Add User</button>
+    </form>
+</div>
+
+<!-- USER LIST -->
+@{
+    var managers = Model.Where(u => u.Role == "Manager").ToList();
+    var planners = Model.Where(u => u.Role == "Planner").ToList();
+    var technicians = Model.Where(u => u.Role == "Technician").ToList();
+}
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <!-- Managers -->
+    <div class="table-wrap">
+        <div class="table-header">
+            <h2>MANAGERS</h2>
+            <span class="count">@managers.Count</span>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Username</th><th>Actions</th></tr></thead>
+            <tbody>
+                @foreach (var u in managers)
+                {
+                    <tr>
+                        <td style="font-weight:600">@u.FullName</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem">@u.Username</td>
+                        <td style="white-space:nowrap">
+                            <form method="post" asp-action="ResetPassword" asp-controller="Account" style="display:inline-flex;gap:3px;align-items:center">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input name="newPassword" placeholder="New pwd" style="width:70px;padding:3px 6px;font-size:.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text)" />
+                                <button type="submit" class="btn btn-sm" style="font-size:.55rem;padding:3px 6px">Reset</button>
+                            </form>
+                            <form method="post" asp-action="DeleteUser" asp-controller="Account" style="display:inline;margin-left:4px">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" onclick="return confirm('Delete @u.FullName?')"
+                                        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.7rem;font-weight:700">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Planners -->
+    <div class="table-wrap">
+        <div class="table-header">
+            <h2>PLANNERS</h2>
+            <span class="count">@planners.Count</span>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Username</th><th>Actions</th></tr></thead>
+            <tbody>
+                @foreach (var u in planners)
+                {
+                    <tr>
+                        <td style="font-weight:600">@u.FullName</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem">@u.Username</td>
+                        <td style="white-space:nowrap">
+                            <form method="post" asp-action="ResetPassword" asp-controller="Account" style="display:inline-flex;gap:3px;align-items:center">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input name="newPassword" placeholder="New pwd" style="width:70px;padding:3px 6px;font-size:.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text)" />
+                                <button type="submit" class="btn btn-sm" style="font-size:.55rem;padding:3px 6px">Reset</button>
+                            </form>
+                            <form method="post" asp-action="DeleteUser" asp-controller="Account" style="display:inline;margin-left:4px">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" onclick="return confirm('Delete @u.FullName?')"
+                                        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.7rem;font-weight:700">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Technicians -->
+    <div class="table-wrap">
+        <div class="table-header">
+            <h2>TECHNICIANS</h2>
+            <span class="count">@technicians.Count</span>
+        </div>
+        <table>
+            <thead><tr><th>Name</th><th>Username</th><th>Actions</th></tr></thead>
+            <tbody>
+                @foreach (var u in technicians)
+                {
+                    <tr>
+                        <td style="font-weight:600">@u.FullName</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem">@u.Username</td>
+                        <td style="white-space:nowrap">
+                            <form method="post" asp-action="ResetPassword" asp-controller="Account" style="display:inline-flex;gap:3px;align-items:center">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input name="newPassword" placeholder="New pwd" style="width:70px;padding:3px 6px;font-size:.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text)" />
+                                <button type="submit" class="btn btn-sm" style="font-size:.55rem;padding:3px 6px">Reset</button>
+                            </form>
+                            <form method="post" asp-action="DeleteUser" asp-controller="Account" style="display:inline;margin-left:4px">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" onclick="return confirm('Delete @u.FullName?')"
+                                        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.7rem;font-weight:700">✕</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

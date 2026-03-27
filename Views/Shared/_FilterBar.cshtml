@@ -1,0 +1,39 @@
+@{
+    var customers = ViewBag.Customers as List<CustomerMaster> ?? new List<CustomerMaster>();
+    var models = ViewBag.Models as List<ModelMaster> ?? new List<ModelMaster>();
+    var filterCustomer = ViewBag.FilterCustomer as string;
+    var filterModel = ViewBag.FilterModel as string;
+    var actionName = ViewBag.FilterAction as string ?? ViewContext.RouteData.Values["action"]?.ToString();
+    var extraParams = ViewBag.FilterExtra as Dictionary<string, string>;
+}
+
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <form method="get" asp-action="@actionName" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        @if (extraParams != null)
+        {
+            @foreach (var kv in extraParams)
+            {
+                <input type="hidden" name="@kv.Key" value="@kv.Value" />
+            }
+        }
+        <select name="filterCustomer" style="padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.8rem;min-width:160px">
+            <option value="">All Customers</option>
+            @foreach (var c in customers)
+            {
+                <option value="@c.CustomerName" selected="@(filterCustomer == c.CustomerName)">@c.CustomerName</option>
+            }
+        </select>
+        <select name="filterModel" style="padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.8rem;min-width:140px">
+            <option value="">All Models</option>
+            @foreach (var m in models)
+            {
+                <option value="@m.ModelName" selected="@(filterModel == m.ModelName)">@m.ModelName</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        @if (!string.IsNullOrEmpty(filterCustomer) || !string.IsNullOrEmpty(filterModel))
+        {
+            <a href="@Url.Action(actionName, extraParams != null ? new RouteValueDictionary(extraParams) : null)" class="btn btn-sm" style="font-size:.65rem">✕ Clear</a>
+        }
+    </form>
+</div>

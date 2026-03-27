@@ -1,0 +1,84 @@
+@model TrackerViewModel
+@{ ViewData["Title"] = "PRODUCTION TRACKER"; }
+
+<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    @{ ViewBag.FilterAction = "Tracker"; }
+    @await Html.PartialAsync("_FilterBar")
+    <form method="get" asp-action="Tracker" style="display:inline-flex;gap:6px">
+        <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
+        <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
+        <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
+    </form>
+    <a class="btn btn-sm" href="@Url.Action("ExportCsv", "Home")">Export CSV</a>
+</div>
+
+<div class="table-wrap">
+    <div class="table-header">
+        <h2>PRODUCTION TRACKER</h2>
+        <span class="count">@Model.Rows.Count jobs</span>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr><th>Priority</th><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Description</th><th>Qty</th><th>Date</th><th>Processes</th><th>Status</th>@if(User.IsInRole("Manager")){<th>Actions</th>}</tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr class="@(row.IsComplete ? "row-green" : "")">
+                        <td style="font-family:var(--font-mono);font-weight:700;text-align:center;font-size:.9rem;color:@(row.Job.Priority.HasValue ? "var(--white)" : "var(--text3)")">
+                            @(row.Job.Priority.HasValue ? row.Job.Priority.ToString() : "—")
+                        </td>
+                        <td class="serial-cell">@row.Job.Serial</td>
+                        <td>@row.Job.Customer</td>
+                        <td>@row.Job.Model</td>
+                        <td>@row.Job.Drawing</td>
+                        <td style="font-size:.78rem;color:var(--text2)">@(row.Job.DrawingDescription ?? "—")</td>
+                        <td>@row.Job.Qty</td>
+                        <td>@row.Job.InwardDate</td>
+                        <td>
+                            @if (row.Chips.Any())
+                            {
+                                @foreach (var chip in row.Chips)
+                                {
+                                    <span class="chip @(chip.IsDone ? "chip-green" : "chip-red")" style="margin-right:4px"
+                                          title="@(chip.IsDone ? "Done" : $"Remaining: {chip.RemainingQty}")">
+                                        @chip.Name
+                                        @if (!chip.IsDone && chip.RemainingQty > 0)
+                                        {
+                                            <span style="font-size:.6rem;opacity:.8"> (@chip.RemainingQty)</span>
+                                        }
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span style="color:var(--text3)">—</span>
+                            }
+                        </td>
+                        <td style="font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:@(row.IsComplete ? "var(--green)" : "var(--text3)")">
+                            @(row.IsComplete ? "COMPLETE" : "IN PROGRESS")
+                        </td>
+                        @if(User.IsInRole("Manager"))
+                        {
+                        <td style="white-space:nowrap">
+                            @if (row.IsComplete)
+                            {
+                                <form method="post" asp-action="MoveToFinished" style="display:inline">
+                                    <input type="hidden" name="id" value="@row.Job.Id" />
+                                    <button type="submit" class="btn btn-sm" style="color:var(--green);border-color:var(--green-border);font-size:.6rem;margin-right:4px">✓ Finish</button>
+                                </form>
+                            }
+                            <form method="post" asp-action="DeleteJob" style="display:inline">
+                                <input type="hidden" name="id" value="@row.Job.Id" />
+                                <button type="submit" onclick="return confirm('Delete job @row.Job.Serial permanently?')"
+                                        class="btn btn-sm" style="color:var(--red);border-color:var(--red-border);font-size:.6rem">✕ Delete</button>
+                            </form>
+                        </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

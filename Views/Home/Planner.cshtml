@@ -1,0 +1,68 @@
+@model PlannerViewModel
+@{ ViewData["Title"] = "PLANNER"; }
+
+@{
+    var processOptions = new[] { "", "VMC", "Milling", "Lathe", "Shaper", "Other" };
+}
+
+<div style="margin-bottom:16px">
+    @{ ViewBag.FilterAction = "Planner"; }
+    @await Html.PartialAsync("_FilterBar")
+</div>
+
+<div class="table-wrap">
+    <div class="table-header">
+        <h2>ASSIGN PROCESSES</h2>
+        <span class="count">@Model.Jobs.Count jobs</span>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Priority</th><th>Serial</th><th>Customer</th><th>Qty</th>
+                    <th>Process 1</th><th>Process 2</th><th>Process 3</th><th>Process 4</th><th>Process 5</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model.Jobs)
+                {
+                    <tr>
+                        <td>
+                            <select form="form-@job.Id" name="Priority"
+                                    style="width:60px;padding:5px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:.8rem;text-align:center">
+                                <option value="">—</option>
+                                @for (int p = 1; p <= 10; p++)
+                                {
+                                    <option value="@p" selected="@(job.Priority == p)">@p</option>
+                                }
+                            </select>
+                        </td>
+                        <td class="serial-cell">@job.Serial</td>
+                        <td>@job.Customer</td>
+                        <td>@job.Qty</td>
+                        @for (int pi = 0; pi < 5; pi++)
+                        {
+                            var currentVal = job.GetProcessAt(pi) ?? "";
+                            <td>
+                                <select form="form-@job.Id" name="Process@(pi + 1)" style="padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.82rem">
+                                    @foreach (var opt in processOptions)
+                                    {
+                                        <option value="@opt" selected="@(opt == currentVal)">@(string.IsNullOrEmpty(opt) ? "—" : opt)</option>
+                                    }
+                                </select>
+                            </td>
+                        }
+                        <td>
+                            <form id="form-@job.Id" method="post" asp-action="SavePlanner" style="display:inline">
+                                <input type="hidden" name="JobId" value="@job.Id" />
+                                <input type="hidden" name="Role" value="planner" />
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

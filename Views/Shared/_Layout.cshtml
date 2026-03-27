@@ -1,0 +1,104 @@
+@{
+    var currentPage = ViewBag.CurrentPage as string ?? "dashboard";
+    var errorMsg = TempData["Error"] as string;
+    var isManager = User.IsInRole("Manager");
+    var isPlanner = User.IsInRole("Planner");
+    var isTechnician = User.IsInRole("Technician");
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "";
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MachinePro — Machine Shop Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-brand">MACHINEPRO<span>Shop Management v2.0</span></div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Operations</div>
+        <a class="nav-item @(currentPage == "dashboard" ? "active" : "")" href="@Url.Action("Index", "Home")">
+            <span class="icon">◻</span>Dashboard
+        </a>
+        <a class="nav-item @(currentPage == "requests" ? "active" : "")" href="@Url.Action("Requests", "Home")">
+            <span class="icon">＋</span>Submit Request
+        </a>
+        <a class="nav-item @(currentPage == "planner" ? "active" : "")" href="@Url.Action("Planner", "Home")">
+            <span class="icon">⚙</span>Planner
+        </a>
+        <a class="nav-item @(currentPage == "tracker" ? "active" : "")" href="@Url.Action("Tracker", "Home")">
+            <span class="icon">📈</span>Production Tracker
+        </a>
+        @if (isManager)
+        {
+            <a class="nav-item @(currentPage == "history" ? "active" : "")" href="@Url.Action("History", "Home")">
+                <span class="icon">🕘</span>Planner History
+            </a>
+            <a class="nav-item @(currentPage == "masterdata" ? "active" : "")" href="@Url.Action("MasterData", "Home")">
+                <span class="icon">📋</span>Master Data
+            </a>
+            <a class="nav-item @(currentPage == "users" ? "active" : "")" href="@Url.Action("Users", "Account")">
+                <span class="icon">👥</span>Users
+            </a>
+        }
+        <div class="nav-section">Modules</div>
+        <a class="nav-item @(currentPage == "vmc" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "VMC" })">
+            <span class="icon">▣</span>VMC
+        </a>
+        <a class="nav-item @(currentPage == "milling" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "Milling" })">
+            <span class="icon">▤</span>Milling
+        </a>
+        <a class="nav-item @(currentPage == "lathe" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "Lathe" })">
+            <span class="icon">▥</span>Lathe
+        </a>
+        <a class="nav-item @(currentPage == "shaper" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "Shaper" })">
+            <span class="icon">▦</span>Shaper
+        </a>
+        <div class="nav-section">Completed</div>
+        <a class="nav-item @(currentPage == "finished" ? "active" : "")" href="@Url.Action("Finished", "Home")">
+            <span class="icon">✓</span>Finished
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div style="padding:10px 8px;border-bottom:1px solid var(--border);margin-bottom:8px">
+            <div style="font-weight:600;font-size:.85rem;color:var(--white)">@fullName</div>
+            <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-top:2px">@userRole</div>
+        </div>
+        <a href="@Url.Action("Logout", "Account")" class="btn btn-sm" style="width:100%;justify-content:center;font-size:.72rem">Sign Out</a>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <h1>@ViewData["Title"]</h1>
+        <div class="topbar-right">
+            <span class="topbar-badge">@userRole.ToUpper()</span>
+            <span style="font-size:.78rem;color:var(--text2);font-weight:500">@fullName</span>
+        </div>
+    </div>
+    <div class="content">
+        @RenderBody()
+    </div>
+</div>
+
+<!-- ERROR MODAL -->
+@if (!string.IsNullOrEmpty(errorMsg))
+{
+    <div class="modal-overlay show" id="errorModal" onclick="this.classList.remove('show')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h3>⚠ ERROR</h3>
+            <p>@errorMsg</p>
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="document.getElementById('errorModal').classList.remove('show')">Understood</button>
+        </div>
+    </div>
+}
+
+</body>
+</html>
