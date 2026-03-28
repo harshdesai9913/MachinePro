@@ -716,15 +716,15 @@ public class HomeController : Controller
             {
                 var prevEntry = job.ModuleEntries.FirstOrDefault(e => e.ModuleName == p);
                 var prevDone = prevEntry?.FinishedQty ?? 0;
-                var currentDone = entry.FinishedQty ?? 0;
+                var thisDone = entry.FinishedQty ?? 0;
                 if (prevDone == 0)
                 {
                     TempData["Error"] = $"Cannot record qty for Step {StepIndex + 1} ({ModuleName}) before Step {actualIdx + 1} ({p}) has recorded any quantity.";
                     return RedirectToAction("Module", new { name = ModuleName });
                 }
-                if (currentDone + RecordQty > prevDone)
+                if (thisDone + RecordQty > prevDone)
                 {
-                    TempData["Error"] = $"Cannot record {RecordQty} pcs for {ModuleName}. Step {actualIdx + 1} ({p}) has only completed {prevDone} pcs so far. Maximum you can record: {prevDone - currentDone}.";
+                    TempData["Error"] = $"Cannot record {RecordQty} pcs for {ModuleName}. Step {actualIdx + 1} ({p}) has only completed {prevDone} pcs so far. Maximum you can record: {prevDone - thisDone}.";
                     return RedirectToAction("Module", new { name = ModuleName });
                 }
             }
