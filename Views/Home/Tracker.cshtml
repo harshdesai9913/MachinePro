@@ -56,8 +56,11 @@
                                 <span style="color:var(--text3)">—</span>
                             }
                         </td>
-                        <td style="font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:@(row.IsComplete ? "var(--green)" : "var(--text3)")">
-                            @(row.IsComplete ? "COMPLETE" : "IN PROGRESS")
+                        @{
+                            var notStarted = !row.IsComplete && row.Chips.All(c => c.FinishedQty == 0);
+                        }
+                        <td style="font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:@(row.IsComplete ? "var(--green)" : notStarted ? "var(--text3)" : "var(--white)")">
+                            @(row.IsComplete ? "COMPLETE" : notStarted ? "Not Started" : "IN PROGRESS")
                         </td>
                         @if(User.IsInRole("Manager"))
                         {
