@@ -609,6 +609,22 @@ public class HomeController : Controller
 
             var entry = job.ModuleEntries.FirstOrDefault(e => e.ModuleName == name);
             var finQty = entry?.FinishedQty ?? 0;
+            var remaining = job.Qty - finQty;
+
+            // Available qty is capped by how much the previous step has completed
+            var availableQty = remaining;
+            if (stepIndex > 0)
+            {
+                var procs = job.GetProcesses();
+                var prevProc = procs.ElementAtOrDefault(stepIndex - 1);
+                if (prevProc != null && prevProc != "Other")
+                {
+                    var prevEntry = job.ModuleEntries.FirstOrDefault(e => e.ModuleName == prevProc);
+                    var prevDone = prevEntry?.FinishedQty ?? 0;
+                    availableQty = Math.Max(0, prevDone - finQty);
+                }
+            }
+
             moduleJobs.Add(new ModuleJobRow
             {
                 JobId = job.Id,
@@ -622,7 +638,8 @@ public class HomeController : Controller
                 MachineNumber = entry?.MachineNumber,
                 IsFinished = entry?.IsFinished ?? false,
                 FinishedQty = entry?.FinishedQty,
-                RemainingQty = job.Qty - finQty,
+                RemainingQty = remaining,
+                AvailableQty = availableQty,
                 FinishedDate = entry?.FinishedDate,
                 ModuleEntryId = entry?.Id
             });
@@ -690,7 +707,7 @@ public class HomeController : Controller
             return RedirectToAction("Module", new { name = ModuleName });
         }
 
-        // CHECK: Sequential enforcement
+        // CHECK: Sequential enforcement (partial qty allowed)
         var procs = job.GetProcesses();
         foreach (var p in procs)
         {
@@ -698,9 +715,16 @@ public class HomeController : Controller
             if (actualIdx < StepIndex && p != "Other")
             {
                 var prevEntry = job.ModuleEntries.FirstOrDefault(e => e.ModuleName == p);
-                if (prevEntry == null || !prevEntry.IsFinished)
+                var prevDone = prevEntry?.FinishedQty ?? 0;
+                var currentDone = entry.FinishedQty ?? 0;
+                if (prevDone == 0)
                 {
-                    TempData["Error"] = $"Cannot record qty for Step {StepIndex + 1} ({ModuleName}) before Step {actualIdx + 1} ({p}) is completed.";
+                    TempData["Error"] = $"Cannot record qty for Step {StepIndex + 1} ({ModuleName}) before Step {actualIdx + 1} ({p}) has recorded any quantity.";
+                    return RedirectToAction("Module", new { name = ModuleName });
+                }
+                if (currentDone + RecordQty > prevDone)
+                {
+                    TempData["Error"] = $"Cannot record {RecordQty} pcs for {ModuleName}. Step {actualIdx + 1} ({p}) has only completed {prevDone} pcs so far. Maximum you can record: {prevDone - currentDone}.";
                     return RedirectToAction("Module", new { name = ModuleName });
                 }
             }

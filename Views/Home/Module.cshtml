@@ -81,7 +81,7 @@
                                     <input type="hidden" name="JobId" value="@mj.JobId" />
                                     <input type="hidden" name="ModuleName" value="@Model.ModuleName" />
                                     <input type="hidden" name="StepIndex" value="@mj.StepIndex" />
-                                    <input type="number" name="RecordQty" min="1" max="@remaining" placeholder="Qty"
+                                    <input type="number" name="RecordQty" min="1" max="@mj.AvailableQty" placeholder="Qty"
                                            style="width:60px;padding:5px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:.8rem;text-align:center" />
                                     <button type="submit" class="btn btn-sm btn-primary" style="padding:4px 10px;font-size:.65rem;white-space:nowrap">
                                         Record

@@ -38,6 +38,7 @@ public class ModuleJobRow
     public bool IsFinished { get; set; }
     public int? FinishedQty { get; set; }
     public int RemainingQty { get; set; }
+    public int AvailableQty { get; set; }
     public string? FinishedDate { get; set; }
     public int? ModuleEntryId { get; set; }
 }
