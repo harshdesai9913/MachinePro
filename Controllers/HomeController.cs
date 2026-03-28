@@ -615,6 +615,8 @@ public class HomeController : Controller
                 Serial = job.Serial,
                 Customer = job.Customer,
                 Model = job.Model,
+                Drawing = job.Drawing,
+                DrawingDescription = job.DrawingDescription,
                 Qty = job.Qty,
                 StepIndex = stepIndex,
                 MachineNumber = entry?.MachineNumber,

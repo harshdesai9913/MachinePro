@@ -15,7 +15,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Serial</th><th>Customer</th><th>Model</th><th>Total Qty</th><th>Step</th>
+                    <th>Serial</th><th>Customer</th><th>Model</th><th>Drawing No.</th><th>Description</th><th>Total Qty</th><th>Step</th>
                     <th>@Model.ModuleName #</th><th>Done</th><th>Remaining</th><th>Record Qty</th><th>Status</th><th>Last Updated</th>
                 </tr>
             </thead>
@@ -29,6 +29,8 @@
                         <td class="serial-cell">@mj.Serial</td>
                         <td>@mj.Customer</td>
                         <td>@mj.Model</td>
+                        <td style="font-family:var(--font-mono);font-size:.8rem">@mj.Drawing</td>
+                        <td style="font-size:.8rem;color:var(--text2)">@mj.DrawingDescription</td>
                         <td>@mj.Qty</td>
                         <td>
                             <span class="chip @(mj.IsFinished ? "chip-green" : "chip-red")">Step @(mj.StepIndex + 1)</span>
@@ -71,7 +73,7 @@
                         <td>
                             @if (mj.IsFinished)
                             {
-                                <span style="font-family:var(--font-mono);font-size:.75rem;color:var(--green)">✓ Complete</span>
+                                <span class="chip chip-green">✓ Complete</span>
                             }
                             else
                             {

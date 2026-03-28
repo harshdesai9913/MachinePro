@@ -30,6 +30,8 @@ public class ModuleJobRow
     public string Serial { get; set; } = string.Empty;
     public string Customer { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
+    public string Drawing { get; set; } = string.Empty;
+    public string? DrawingDescription { get; set; }
     public int Qty { get; set; }
     public int StepIndex { get; set; }
     public string? MachineNumber { get; set; }
