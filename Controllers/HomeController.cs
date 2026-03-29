@@ -112,6 +112,109 @@ public class HomeController : Controller
         return RedirectToAction("Requests");
     }
 
+    [HttpPost]
+    public async Task<IActionResult> ImportCsv(IFormFile? csvFile)
+    {
+        if (csvFile == null || csvFile.Length == 0)
+        {
+            TempData["Error"] = "Please select a CSV file.";
+            return RedirectToAction("Requests");
+        }
+
+        var lines = new List<string>();
+        using (var reader = new System.IO.StreamReader(csvFile.OpenReadStream()))
+        {
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (line != null) lines.Add(line);
+            }
+        }
+
+        if (lines.Count < 2)
+        {
+            TempData["Error"] = "CSV file must have a header row and at least one data row.";
+            return RedirectToAction("Requests");
+        }
+
+        // Parse header row to find column indices
+        var headers = ParseCsvRow(lines[0]);
+        int idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxDesc = -1, idxQty = -1;
+        for (int i = 0; i < headers.Count; i++)
+        {
+            var h = headers[i].ToLowerInvariant().Trim();
+            if (h is "customer" or "customer name") idxCustomer = i;
+            else if (h is "model" or "machine model" or "customer model") idxModel = i;
+            else if (h is "drawing" or "dwg no" or "dwg no." or "drawing no" or "drawing number" or "dwg") idxDrawing = i;
+            else if (h is "description" or "drawing description" or "desc") idxDesc = i;
+            else if (h is "qty" or "quantity") idxQty = i;
+        }
+
+        if (idxCustomer < 0 || idxModel < 0 || idxDrawing < 0 || idxQty < 0)
+        {
+            TempData["Error"] = "CSV must have columns: Customer Name, Machine Model, DWG No., Quantity (and optionally Description).";
+            return RedirectToAction("Requests");
+        }
+
+        int imported = 0, skipped = 0;
+        var today = DateTime.Now.ToString("dd/MM/yyyy");
+
+        for (int r = 1; r < lines.Count; r++)
+        {
+            if (string.IsNullOrWhiteSpace(lines[r])) continue;
+            var cols = ParseCsvRow(lines[r]);
+
+            var customer = idxCustomer < cols.Count ? cols[idxCustomer].Trim() : "";
+            var model    = idxModel    < cols.Count ? cols[idxModel].Trim()    : "";
+            var drawing  = idxDrawing  < cols.Count ? cols[idxDrawing].Trim()  : "";
+            var desc     = idxDesc >= 0 && idxDesc < cols.Count ? cols[idxDesc].Trim() : null;
+            var qtyStr   = idxQty      < cols.Count ? cols[idxQty].Trim()      : "";
+
+            if (string.IsNullOrEmpty(customer) || string.IsNullOrEmpty(model) ||
+                string.IsNullOrEmpty(drawing)  || !int.TryParse(qtyStr, out int qty) || qty <= 0)
+            {
+                skipped++;
+                continue;
+            }
+
+            var nextNum = 1;
+            while (await _db.Jobs.AnyAsync(j => j.Serial == $"SN-{nextNum:D3}")) nextNum++;
+
+            _db.Jobs.Add(new Job
+            {
+                Serial = $"SN-{nextNum:D3}",
+                Customer = customer,
+                Model = model,
+                Drawing = drawing,
+                DrawingDescription = string.IsNullOrEmpty(desc) ? null : desc,
+                Qty = qty,
+                InwardDate = today
+            });
+            await _db.SaveChangesAsync();
+            imported++;
+        }
+
+        TempData["Success"] = skipped > 0
+            ? $"Imported {imported} job(s). {skipped} row(s) skipped due to missing/invalid data."
+            : $"Successfully imported {imported} job(s).";
+        return RedirectToAction("Requests");
+    }
+
+    private static List<string> ParseCsvRow(string line)
+    {
+        var result = new List<string>();
+        bool inQuotes = false;
+        var current = new System.Text.StringBuilder();
+        foreach (char c in line)
+        {
+            if (c == '"') { inQuotes = !inQuotes; }
+            else if (c == ',' && !inQuotes) { result.Add(current.ToString()); current.Clear(); }
+            else { current.Append(c); }
+        }
+        result.Add(current.ToString());
+        return result;
+    }
+
     // ─── PLANNER ───
     public async Task<IActionResult> Planner(string? filterCustomer, string? filterModel)
     {
