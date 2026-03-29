@@ -5,15 +5,16 @@
     var processOptions = new[] { "", "VMC", "Milling", "Lathe", "Shaper", "Other" };
 }
 
-<div style="margin-bottom:16px">
-    @{ ViewBag.FilterAction = "Planner"; }
-    @await Html.PartialAsync("_FilterBar")
-</div>
-
 <div class="table-wrap">
     <div class="table-header">
-        <h2>ASSIGN PROCESSES</h2>
-        <span class="count">@Model.Jobs.Count jobs</span>
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>ASSIGN PROCESSES</h2>
+            <span class="count">@Model.Jobs.Count jobs</span>
+        </div>
+        <div>
+            @{ ViewBag.FilterAction = "Planner"; }
+            @await Html.PartialAsync("_FilterBar")
+        </div>
     </div>
     <div class="table-scroll">
         <table>

@@ -1,24 +1,24 @@
 @model HistoryViewModel
 @{ ViewData["Title"] = "PLANNER HISTORY"; }
 
-<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    @{ ViewBag.FilterAction = "History"; }
-    @await Html.PartialAsync("_FilterBar")
-    <form method="get" asp-action="History" style="display:inline-flex;gap:6px">
-        <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
-        <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
-        <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
-    </form>
-    <form method="post" asp-action="ClearHistory" style="display:inline" onsubmit="return confirm('Clear all planner history? This cannot be undone.')">
-        <button type="submit" class="btn btn-sm">Clear History</button>
-    </form>
-    <span style="font-size:.75rem;color:var(--text3);font-family:var(--font-mono)">@Model.Entries.Count entries</span>
-</div>
-
 <div class="table-wrap">
     <div class="table-header">
-        <h2>PROCESS CHANGE LOG</h2>
-        <span class="count">All planner modifications</span>
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>PROCESS CHANGE LOG</h2>
+            <span class="count">@Model.Entries.Count entries</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            @{ ViewBag.FilterAction = "History"; }
+            @await Html.PartialAsync("_FilterBar")
+            <form method="get" asp-action="History" style="display:inline-flex;gap:6px">
+                <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
+                <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
+                <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
+            </form>
+            <form method="post" asp-action="ClearHistory" style="display:inline" onsubmit="return confirm('Clear all planner history? This cannot be undone.')">
+                <button type="submit" class="btn btn-sm">Clear History</button>
+            </form>
+        </div>
     </div>
     <div class="table-scroll">
         <table>

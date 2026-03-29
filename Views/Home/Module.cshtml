@@ -1,15 +1,16 @@
 @model ModuleViewModel
 @{ ViewData["Title"] = $"{Model.ModuleName.ToUpper()} MODULE"; }
 
-<div style="margin-bottom:16px">
-    @{ ViewBag.FilterAction = "Module"; ViewBag.FilterExtra = new Dictionary<string, string> { { "name", Model.ModuleName } }; }
-    @await Html.PartialAsync("_FilterBar")
-</div>
-
 <div class="table-wrap">
     <div class="table-header">
-        <h2>@Model.ModuleName.ToUpper() JOBS</h2>
-        <span class="count">@Model.Jobs.Count entries</span>
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>@Model.ModuleName.ToUpper() JOBS</h2>
+            <span class="count">@Model.Jobs.Count entries</span>
+        </div>
+        <div>
+            @{ ViewBag.FilterAction = "Module"; ViewBag.FilterExtra = new Dictionary<string, string> { { "name", Model.ModuleName } }; }
+            @await Html.PartialAsync("_FilterBar")
+        </div>
     </div>
     <div class="table-scroll">
         <table>

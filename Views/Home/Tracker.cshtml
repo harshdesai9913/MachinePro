@@ -1,21 +1,22 @@
 @model TrackerViewModel
 @{ ViewData["Title"] = "PRODUCTION TRACKER"; }
 
-<div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    @{ ViewBag.FilterAction = "Tracker"; }
-    @await Html.PartialAsync("_FilterBar")
-    <form method="get" asp-action="Tracker" style="display:inline-flex;gap:6px">
-        <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
-        <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
-        <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
-    </form>
-    <a class="btn btn-sm" href="@Url.Action("ExportCsv", "Home")">Export CSV</a>
-</div>
-
 <div class="table-wrap">
     <div class="table-header">
-        <h2>PRODUCTION TRACKER</h2>
-        <span class="count">@Model.Rows.Count jobs</span>
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>PRODUCTION TRACKER</h2>
+            <span class="count">@Model.Rows.Count jobs</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            @{ ViewBag.FilterAction = "Tracker"; }
+            @await Html.PartialAsync("_FilterBar")
+            <form method="get" asp-action="Tracker" style="display:inline-flex;gap:6px">
+                <input type="hidden" name="filterCustomer" value="@ViewBag.FilterCustomer" />
+                <input type="hidden" name="filterModel" value="@ViewBag.FilterModel" />
+                <input class="search-input" name="search" placeholder="Search serial..." value="@Model.Search" />
+            </form>
+            <a class="btn btn-sm" href="@Url.Action("ExportCsv", "Home")">Export CSV</a>
+        </div>
     </div>
     <div class="table-scroll">
         <table>
