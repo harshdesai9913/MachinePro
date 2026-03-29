@@ -41,6 +41,19 @@ using (var scope = app.Services.CreateScope())
         if (!cols.Contains("State"))   { cmd.CommandText = "ALTER TABLE CustomerMasters ADD COLUMN State TEXT"; cmd.ExecuteNonQuery(); }
         if (!cols.Contains("Country")) { cmd.CommandText = "ALTER TABLE CustomerMasters ADD COLUMN Country TEXT NOT NULL DEFAULT 'India'"; cmd.ExecuteNonQuery(); }
     }
+
+    // Jobs table migrations
+    var jobCols = new List<string>();
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = "PRAGMA table_info(Jobs)";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read()) jobCols.Add(reader.GetString(1));
+    }
+    using (var cmd = conn.CreateCommand())
+    {
+        if (!jobCols.Contains("ItemCode")) { cmd.CommandText = "ALTER TABLE Jobs ADD COLUMN ItemCode TEXT"; cmd.ExecuteNonQuery(); }
+    }
     conn.Close();
 }
 

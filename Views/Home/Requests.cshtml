@@ -21,7 +21,7 @@
         <button type="submit" class="btn btn-primary btn-sm">Import</button>
     </form>
     <p style="font-size:.7rem;color:var(--text3);font-family:var(--font-mono);margin-top:10px">
-        Expected columns: <strong>Customer Name, Machine Model, DWG No., Quantity</strong> (Description optional). Export your Google Sheet as CSV and upload.
+        Expected columns: <strong>Customer Name, Machine Model, DWG No., Quantity</strong> (Item Code &amp; Description optional). Export your Google Sheet as CSV and upload.
     </p>
 </div>
 
@@ -58,6 +58,10 @@
                 <input name="Drawing" placeholder="e.g. DWG-2201" required />
             </div>
             <div class="form-group">
+                <label>Item Code</label>
+                <input name="ItemCode" placeholder="e.g. IC-4401" />
+            </div>
+            <div class="form-group">
                 <label>Drawing Description</label>
                 <input name="DrawingDescription" placeholder="e.g. Engine block housing plate" />
             </div>
@@ -83,7 +87,7 @@
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Description</th><th>Qty</th><th>Date</th></tr>
+                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Date</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var j in Model.Jobs)
@@ -93,6 +97,7 @@
                             <td>@j.Customer</td>
                             <td>@j.Model</td>
                             <td>@j.Drawing</td>
+                            <td style="font-family:var(--font-mono);font-size:.78rem">@(j.ItemCode ?? "—")</td>
                             <td style="font-size:.78rem;color:var(--text2)">@(j.DrawingDescription ?? "—")</td>
                             <td>@j.Qty</td>
                             <td>@j.InwardDate</td>

@@ -42,6 +42,8 @@ public class Job
     [Required]
     public string Drawing { get; set; } = string.Empty;
 
+    public string? ItemCode { get; set; }
+
     public string? DrawingDescription { get; set; }
 
     [Required]

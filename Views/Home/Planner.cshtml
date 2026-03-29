@@ -20,7 +20,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Priority</th><th>Serial</th><th>Customer</th><th>Drawing No.</th><th>Description</th><th>Qty</th>
+                    <th>Priority</th><th>Serial</th><th>Customer</th><th>Drawing No.</th><th>Item Code</th><th>Description</th><th>Qty</th>
                     <th>Process 1</th><th>Process 2</th><th>Process 3</th><th>Process 4</th><th>Process 5</th>
                     <th>Action</th>
                 </tr>
@@ -42,6 +42,7 @@
                         <td class="serial-cell">@job.Serial</td>
                         <td>@job.Customer</td>
                         <td style="font-family:var(--font-mono);font-size:.8rem">@job.Drawing</td>
+                        <td style="font-family:var(--font-mono);font-size:.8rem">@(job.ItemCode ?? "—")</td>
                         <td style="font-size:.8rem;color:var(--text2)">@job.DrawingDescription</td>
                         <td>@job.Qty</td>
                         @for (int pi = 0; pi < 5; pi++)

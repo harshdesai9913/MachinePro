@@ -21,7 +21,7 @@
     <div class="table-scroll">
         <table>
             <thead>
-                <tr><th>Priority</th><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Description</th><th>Qty</th><th>Date</th><th>Processes</th><th>Status</th>@if(User.IsInRole("Manager")){<th>Actions</th>}</tr>
+                <tr><th>Priority</th><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Date</th><th>Processes</th><th>Status</th>@if(User.IsInRole("Manager")){<th>Actions</th>}</tr>
             </thead>
             <tbody>
                 @foreach (var row in Model.Rows)
@@ -34,6 +34,7 @@
                         <td>@row.Job.Customer</td>
                         <td>@row.Job.Model</td>
                         <td>@row.Job.Drawing</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem">@(row.Job.ItemCode ?? "—")</td>
                         <td style="font-size:.78rem;color:var(--text2)">@(row.Job.DrawingDescription ?? "—")</td>
                         <td>@row.Job.Qty</td>
                         <td>@row.Job.InwardDate</td>

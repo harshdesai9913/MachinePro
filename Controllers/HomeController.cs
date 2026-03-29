@@ -77,7 +77,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? DrawingDescription, int Qty)
+    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? ItemCode, string? DrawingDescription, int Qty)
     {
         // Using direct parameters instead of model binding to avoid validation conflicts
         var errors = new List<string>();
@@ -102,6 +102,7 @@ public class HomeController : Controller
             Customer = Customer!.Trim(),
             Model = Model!.Trim(),
             Drawing = Drawing!.Trim(),
+            ItemCode = ItemCode?.Trim(),
             DrawingDescription = DrawingDescription?.Trim(),
             Qty = Qty,
             InwardDate = DateTime.Now.ToString("dd/MM/yyyy")
@@ -139,13 +140,14 @@ public class HomeController : Controller
 
         // Parse header row to find column indices
         var headers = ParseCsvRow(lines[0]);
-        int idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxDesc = -1, idxQty = -1;
+        int idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxItemCode = -1, idxDesc = -1, idxQty = -1;
         for (int i = 0; i < headers.Count; i++)
         {
             var h = headers[i].ToLowerInvariant().Trim();
             if (h is "customer" or "customer name") idxCustomer = i;
             else if (h is "model" or "machine model" or "customer model") idxModel = i;
             else if (h is "drawing" or "dwg no" or "dwg no." or "drawing no" or "drawing number" or "dwg") idxDrawing = i;
+            else if (h is "item code" or "itemcode" or "item_code" or "part no" or "part number") idxItemCode = i;
             else if (h is "description" or "drawing description" or "desc") idxDesc = i;
             else if (h is "qty" or "quantity") idxQty = i;
         }
@@ -166,8 +168,9 @@ public class HomeController : Controller
 
             var customer = idxCustomer < cols.Count ? cols[idxCustomer].Trim() : "";
             var model    = idxModel    < cols.Count ? cols[idxModel].Trim()    : "";
-            var drawing  = idxDrawing  < cols.Count ? cols[idxDrawing].Trim()  : "";
-            var desc     = idxDesc >= 0 && idxDesc < cols.Count ? cols[idxDesc].Trim() : null;
+            var drawing   = idxDrawing   < cols.Count ? cols[idxDrawing].Trim()   : "";
+            var itemCode  = idxItemCode >= 0 && idxItemCode < cols.Count ? cols[idxItemCode].Trim() : null;
+            var desc      = idxDesc >= 0 && idxDesc < cols.Count ? cols[idxDesc].Trim() : null;
             var qtyStr   = idxQty      < cols.Count ? cols[idxQty].Trim()      : "";
 
             if (string.IsNullOrEmpty(customer) || string.IsNullOrEmpty(model) ||
@@ -186,6 +189,7 @@ public class HomeController : Controller
                 Customer = customer,
                 Model = model,
                 Drawing = drawing,
+                ItemCode = string.IsNullOrEmpty(itemCode) ? null : itemCode,
                 DrawingDescription = string.IsNullOrEmpty(desc) ? null : desc,
                 Qty = qty,
                 InwardDate = today
@@ -495,10 +499,10 @@ public class HomeController : Controller
     public async Task<IActionResult> ExportCsv()
     {
         var jobs = await _db.Jobs.ToListAsync();
-        var csv = "Serial,Customer,Model,Drawing,Description,Qty,Date,Process1,Process2,Process3,Process4,Process5\n";
+        var csv = "Serial,Customer,Model,Drawing,Item Code,Description,Qty,Date,Process1,Process2,Process3,Process4,Process5\n";
         foreach (var j in jobs)
         {
-            csv += $"{j.Serial},\"{j.Customer}\",\"{j.Model}\",\"{j.Drawing}\",\"{j.DrawingDescription}\",{j.Qty},{j.InwardDate},{j.Process1},{j.Process2},{j.Process3},{j.Process4},{j.Process5}\n";
+            csv += $"{j.Serial},\"{j.Customer}\",\"{j.Model}\",\"{j.Drawing}\",\"{j.ItemCode}\",\"{j.DrawingDescription}\",{j.Qty},{j.InwardDate},{j.Process1},{j.Process2},{j.Process3},{j.Process4},{j.Process5}\n";
         }
         return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "production_data.csv");
     }
@@ -741,6 +745,7 @@ public class HomeController : Controller
                 Customer = job.Customer,
                 Model = job.Model,
                 Drawing = job.Drawing,
+                ItemCode = job.ItemCode,
                 DrawingDescription = job.DrawingDescription,
                 Qty = job.Qty,
                 StepIndex = stepIndex,
