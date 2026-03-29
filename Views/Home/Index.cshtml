@@ -23,10 +23,12 @@
 <div class="stat-row">
     @foreach (var kv in Model.ModuleBreakdown)
     {
-        <div class="stat-card">
-            <div class="label">@kv.Key</div>
-            <div class="value">@kv.Value.Total</div>
-            <div class="sub">✓ @kv.Value.Finished done · ⏳ @kv.Value.Pending pending · ⚠ @kv.Value.Unassigned unassigned</div>
-        </div>
+        <a href="@Url.Action("Module", "Home", new { name = kv.Key })" style="text-decoration:none">
+            <div class="stat-card" style="cursor:pointer">
+                <div class="label">@kv.Key</div>
+                <div class="value">@kv.Value.Total</div>
+                <div class="sub">✓ @kv.Value.Finished done · ⏳ @kv.Value.Pending pending · ⚠ @kv.Value.Unassigned unassigned</div>
+            </div>
+        </a>
     }
 </div>
