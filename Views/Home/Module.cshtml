@@ -30,9 +30,9 @@
                         <td class="serial-cell">@mj.Serial</td>
                         <td>@mj.Customer</td>
                         <td>@mj.Model</td>
-                        <td style="font-family:var(--font-mono);font-size:.8rem">@mj.Drawing</td>
-                        <td style="font-family:var(--font-mono);font-size:.8rem">@(mj.ItemCode ?? "—")</td>
-                        <td style="font-size:.8rem;color:var(--text2)">@mj.DrawingDescription</td>
+                        <td style="font-family:var(--font-mono);font-size:.75rem">@mj.Drawing</td>
+                        <td style="font-family:var(--font-mono);font-size:.75rem">@(mj.ItemCode ?? "—")</td>
+                        <td style="font-size:.75rem;color:var(--text2)">@mj.DrawingDescription</td>
                         <td>@mj.Qty</td>
                         <td>
                             <span class="chip @(mj.IsFinished ? "chip-green" : "chip-red")">Step @(mj.StepIndex + 1)</span>
@@ -42,7 +42,7 @@
                         <td>
                             @if (mj.IsFinished)
                             {
-                                <span style="font-family:var(--font-mono);font-size:.8rem">@Model.ModuleName #@mj.MachineNumber</span>
+                                <span style="font-family:var(--font-mono);font-size:.75rem">@Model.ModuleName #@mj.MachineNumber</span>
                             }
                             else if (mj.ModuleEntryId.HasValue)
                             {
@@ -84,7 +84,7 @@
                                     <input type="hidden" name="ModuleName" value="@Model.ModuleName" />
                                     <input type="hidden" name="StepIndex" value="@mj.StepIndex" />
                                     <input type="number" name="RecordQty" min="1" max="@mj.AvailableQty" placeholder="Qty"
-                                           style="width:60px;padding:5px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:.8rem;text-align:center" />
+                                           style="width:55px;padding:2px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:.75rem;text-align:center" />
                                     <button type="submit" class="btn btn-sm btn-primary" style="padding:4px 10px;font-size:.65rem;white-space:nowrap">
                                         Record
                                     </button>
