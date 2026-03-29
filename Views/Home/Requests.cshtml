@@ -13,16 +13,14 @@
     <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--red);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">✕ @errorMsg</div>
 }
 
-<div class="table-wrap" style="padding:24px;margin-bottom:20px">
-    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:16px;letter-spacing:1px">IMPORT FROM CSV</h2>
-    <form method="post" asp-action="ImportCsv" enctype="multipart/form-data" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<div class="table-wrap" style="padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--white);letter-spacing:1px;white-space:nowrap">IMPORT CSV</span>
+    <form method="post" asp-action="ImportCsv" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px">
         <input type="file" name="csvFile" accept=".csv" required
-               style="font-size:.8rem;font-family:var(--font-mono);color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px" />
-        <button type="submit" class="btn btn-primary btn-sm">Import</button>
+               style="font-size:.7rem;font-family:var(--font-mono);color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:3px 6px" />
+        <button type="submit" class="btn btn-primary btn-sm" style="font-size:.7rem;padding:3px 8px">Import</button>
     </form>
-    <p style="font-size:.7rem;color:var(--text3);font-family:var(--font-mono);margin-top:10px">
-        Expected columns: <strong>Customer Name, Machine Model, DWG No., Quantity</strong> (Item Code &amp; Description optional). Export your Google Sheet as CSV and upload.
-    </p>
+    <span style="font-size:.65rem;color:var(--text3);font-family:var(--font-mono)">Columns: Customer Name · Machine Model · DWG No. · Quantity · Item Code · Description</span>
 </div>
 
 <div class="table-wrap" style="padding:24px">
