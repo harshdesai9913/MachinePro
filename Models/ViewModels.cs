@@ -7,6 +7,10 @@ public class DashboardViewModel
     public int Unassigned { get; set; }
     public int Pending { get; set; }
     public Dictionary<string, ModuleStats> ModuleBreakdown { get; set; } = new();
+    // date string (dd/MM) → count
+    public List<(string Date, int Count)> InwardsLast5Days { get; set; } = new();
+    // module → list of (date, count)
+    public Dictionary<string, List<(string Date, int Count)>> ModuleFinishedLast3Days { get; set; } = new();
 }
 
 public class ModuleStats

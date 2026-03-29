@@ -32,3 +32,52 @@
         </a>
     }
 </div>
+
+<div class="section-title">INWARDS — LAST 5 DAYS</div>
+<div class="table-wrap" style="margin-bottom:20px">
+    <table>
+        <thead>
+            <tr>
+                @foreach (var d in Model.InwardsLast5Days)
+                {
+                    <th style="text-align:center">@d.Date</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @foreach (var d in Model.InwardsLast5Days)
+                {
+                    <td style="text-align:center;font-family:var(--font-mono);font-weight:600;color:@(d.Count > 0 ? "var(--white)" : "var(--text3)")">@d.Count</td>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-title">FINISHED JOBS — LAST 3 DAYS</div>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Module</th>
+                @foreach (var d in Model.ModuleFinishedLast3Days.FirstOrDefault().Value ?? new())
+                {
+                    <th style="text-align:center">@d.Date</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kv in Model.ModuleFinishedLast3Days)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Module", "Home", new { name = kv.Key })" style="font-weight:600;color:var(--white)">@kv.Key</a></td>
+                    @foreach (var d in kv.Value)
+                    {
+                        <td style="text-align:center;font-family:var(--font-mono);font-weight:600;color:@(d.Count > 0 ? "var(--green)" : "var(--text3)")">@d.Count</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

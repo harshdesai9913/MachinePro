@@ -40,13 +40,42 @@ public class HomeController : Controller
             }
         }
 
+        // Inwards last 5 days
+        var today = DateTime.Today;
+        var allJobs = await _db.Jobs.ToListAsync();
+        var inwardsLast5 = new List<(string Date, int Count)>();
+        for (int d = 4; d >= 0; d--)
+        {
+            var day = today.AddDays(-d);
+            var dateStr = day.ToString("dd/MM/yyyy");
+            var count = allJobs.Count(j => j.InwardDate == dateStr);
+            inwardsLast5.Add((day.ToString("dd/MM"), count));
+        }
+
+        // Module finished last 3 days
+        var allEntries = await _db.ModuleEntries.ToListAsync();
+        var moduleFinished = moduleTypes.ToDictionary(m => m, m =>
+        {
+            var dayList = new List<(string Date, int Count)>();
+            for (int d = 2; d >= 0; d--)
+            {
+                var day = today.AddDays(-d);
+                var dateStr = day.ToString("dd/MM/yyyy");
+                var count = allEntries.Count(e => e.ModuleName == m && e.IsFinished && e.FinishedDate == dateStr);
+                dayList.Add((day.ToString("dd/MM"), count));
+            }
+            return dayList;
+        });
+
         var vm = new DashboardViewModel
         {
             TotalParts = jobs.Sum(j => j.Qty),
             TotalJobs = jobs.Count,
             Unassigned = unassigned,
             Pending = pending,
-            ModuleBreakdown = moduleBreakdown
+            ModuleBreakdown = moduleBreakdown,
+            InwardsLast5Days = inwardsLast5,
+            ModuleFinishedLast3Days = moduleFinished
         };
 
         ViewBag.CurrentPage = "dashboard";
