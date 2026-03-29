@@ -466,7 +466,13 @@ public class HomeController : Controller
             return RedirectToAction("MasterData");
         }
 
-        _db.CustomerMasters.Add(new CustomerMaster { CustomerName = model.CustomerName });
+        _db.CustomerMasters.Add(new CustomerMaster
+        {
+            CustomerName = model.CustomerName,
+            City = model.City?.Trim(),
+            State = model.State?.Trim(),
+            Country = string.IsNullOrWhiteSpace(model.Country) ? "India" : model.Country.Trim()
+        });
         await _db.SaveChangesAsync();
         return RedirectToAction("MasterData");
     }

@@ -137,6 +137,9 @@ public class MasterDataViewModel
 public class AddCustomerModel
 {
     public string CustomerName { get; set; } = string.Empty;
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string Country { get; set; } = "India";
 }
 
 public class AddModelModel

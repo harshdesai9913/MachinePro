@@ -24,6 +24,24 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    // Add new columns to CustomerMasters if they don't exist (SQLite schema migration)
+    var conn = db.Database.GetDbConnection();
+    conn.Open();
+    var cols = new List<string>();
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = "PRAGMA table_info(CustomerMasters)";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read()) cols.Add(reader.GetString(1));
+    }
+    using (var cmd = conn.CreateCommand())
+    {
+        if (!cols.Contains("City"))    { cmd.CommandText = "ALTER TABLE CustomerMasters ADD COLUMN City TEXT"; cmd.ExecuteNonQuery(); }
+        if (!cols.Contains("State"))   { cmd.CommandText = "ALTER TABLE CustomerMasters ADD COLUMN State TEXT"; cmd.ExecuteNonQuery(); }
+        if (!cols.Contains("Country")) { cmd.CommandText = "ALTER TABLE CustomerMasters ADD COLUMN Country TEXT NOT NULL DEFAULT 'India'"; cmd.ExecuteNonQuery(); }
+    }
+    conn.Close();
 }
 
 app.UseStaticFiles();
