@@ -1,0 +1,46 @@
+@model List<MachinePro.Models.Job>
+@{ ViewData["Title"] = "UNASSIGNED TASKS"; }
+
+<div class="table-wrap">
+    <div class="table-header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>UNASSIGNED TASKS</h2>
+            <span class="count">@Model.Count jobs</span>
+        </div>
+        <div>
+            @{ ViewBag.FilterAction = "Unassigned"; }
+            @await Html.PartialAsync("_FilterBar")
+        </div>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Inward Date</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px;font-family:var(--font-mono);font-size:.8rem">No unassigned tasks — all jobs have processes assigned.</td></tr>
+                }
+                @foreach (var j in Model)
+                {
+                    <tr>
+                        <td class="serial-cell">@j.Serial</td>
+                        <td>@j.Customer</td>
+                        <td>@j.Model</td>
+                        <td style="font-family:var(--font-mono)">@j.Drawing</td>
+                        <td style="font-family:var(--font-mono)">@(j.ItemCode ?? "—")</td>
+                        <td style="color:var(--text2)">@(j.DrawingDescription ?? "—")</td>
+                        <td>@j.Qty</td>
+                        <td style="font-family:var(--font-mono)">@j.InwardDate</td>
+                        <td>
+                            <a href="@Url.Action("Planner", "Home")" class="btn btn-sm btn-primary" style="font-size:.7rem;padding:3px 10px;white-space:nowrap">Assign →</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

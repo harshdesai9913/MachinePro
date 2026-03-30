@@ -248,6 +248,27 @@ public class HomeController : Controller
         return result;
     }
 
+    // ─── UNASSIGNED TASKS ───
+    public async Task<IActionResult> Unassigned(string? filterCustomer, string? filterModel)
+    {
+        var query = _db.Jobs.Where(j => !j.IsCompleted &&
+            j.Process1 == null && j.Process2 == null && j.Process3 == null &&
+            j.Process4 == null && j.Process5 == null);
+        if (!string.IsNullOrEmpty(filterCustomer)) query = query.Where(j => j.Customer == filterCustomer);
+        if (!string.IsNullOrEmpty(filterModel)) query = query.Where(j => j.Model == filterModel);
+
+        var jobs = await query.OrderBy(j => j.Id).ToListAsync();
+        var customers = await _db.CustomerMasters.OrderBy(c => c.CustomerName).ToListAsync();
+        var models = await _db.ModelMasters.OrderBy(m => m.ModelName).ToListAsync();
+
+        ViewBag.CurrentPage = "unassigned";
+        ViewBag.FilterCustomer = filterCustomer;
+        ViewBag.FilterModel = filterModel;
+        ViewBag.Customers = customers;
+        ViewBag.Models = models;
+        return View(jobs);
+    }
+
     // ─── PLANNER ───
     public async Task<IActionResult> Planner(string? filterCustomer, string? filterModel)
     {
@@ -366,7 +387,8 @@ public class HomeController : Controller
     // ─── PRODUCTION TRACKER ───
     public async Task<IActionResult> Tracker(string? search, string? filterCustomer, string? filterModel)
     {
-        var query = _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted);
+        var query = _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted &&
+            (j.Process1 != null || j.Process2 != null || j.Process3 != null || j.Process4 != null || j.Process5 != null));
         if (!string.IsNullOrEmpty(filterCustomer)) query = query.Where(j => j.Customer == filterCustomer);
         if (!string.IsNullOrEmpty(filterModel)) query = query.Where(j => j.Model == filterModel);
 

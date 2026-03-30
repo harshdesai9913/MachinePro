@@ -32,6 +32,9 @@
         <a class="nav-item @(currentPage == "requests" ? "active" : "")" href="@Url.Action("Requests", "Home")">
             <span class="icon">＋</span>Submit Request
         </a>
+        <a class="nav-item @(currentPage == "unassigned" ? "active" : "")" href="@Url.Action("Unassigned", "Home")">
+            <span class="icon">!</span>Unassigned Tasks
+        </a>
         <a class="nav-item @(currentPage == "planner" ? "active" : "")" href="@Url.Action("Planner", "Home")">
             <span class="icon">⚙</span>Planner
         </a>
