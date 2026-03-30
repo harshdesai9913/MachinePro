@@ -42,7 +42,10 @@
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             @{ ViewBag.FilterAction = "Module"; ViewBag.FilterExtra = new Dictionary<string, string> { { "name", Model.ModuleName } }; }
             @await Html.PartialAsync("_FilterBar")
-            <button class="btn btn-sm" onclick="window.print()" style="white-space:nowrap">Print</button>
+            @if (User.IsInRole("Manager") || User.IsInRole("Planner"))
+            {
+                <button class="btn btn-sm" onclick="window.print()" style="white-space:nowrap">Print</button>
+            }
         </div>
     </div>
 
