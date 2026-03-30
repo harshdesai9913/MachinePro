@@ -19,10 +19,21 @@
         th:nth-child(12), td:nth-child(12),
         th:nth-child(13), td:nth-child(13),
         th:nth-child(14), td:nth-child(14) { display:none !important; }
+        .print-header { display:flex !important; align-items:center; gap:16px; margin-bottom:12px; padding-bottom:10px; border-bottom:2px solid #ccc; }
+        .print-header img { height:56px; object-fit:contain; }
+        .print-header-text { font-size:1rem; font-weight:700; color:#000; letter-spacing:.05em; }
+        .print-header-sub { font-size:.75rem; color:#555; margin-top:2px; }
     }
 </style>
 
 <div class="table-wrap">
+    <div class="print-header" style="display:none">
+        <img src="https://sushaindia.in/wp-content/uploads/2022/02/logo-image.png" alt="Susha India" />
+        <div>
+            <div class="print-header-text">SUSHA PRODUCTION TRACKER</div>
+            <div class="print-header-sub">@Model.ModuleName.ToUpper() JOBS — Printed @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+    </div>
     <div class="table-header">
         <div style="display:flex;align-items:center;gap:12px">
             <h2>@Model.ModuleName.ToUpper() JOBS</h2>
