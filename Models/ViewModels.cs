@@ -116,6 +116,7 @@ public class SavePlannerModel
     public string? Process5 { get; set; }
     public int? Priority { get; set; }
     public string Role { get; set; } = "planner";
+    public string? ReturnTo { get; set; }
 }
 
 public class SetMachineModel

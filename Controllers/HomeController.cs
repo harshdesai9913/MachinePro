@@ -382,7 +382,7 @@ public class HomeController : Controller
         _db.ModuleEntries.RemoveRange(toRemove);
 
         await _db.SaveChangesAsync();
-        return RedirectToAction("Planner");
+        return RedirectToAction(model.ReturnTo == "Unassigned" ? "Unassigned" : "Planner");
     }
 
     // ─── PRODUCTION TRACKER ───

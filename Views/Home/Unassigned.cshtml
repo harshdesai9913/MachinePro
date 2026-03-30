@@ -56,6 +56,7 @@
                             <form id="form-@j.Id" method="post" asp-action="SavePlanner" style="display:inline">
                                 <input type="hidden" name="JobId" value="@j.Id" />
                                 <input type="hidden" name="Role" value="planner" />
+                                <input type="hidden" name="ReturnTo" value="Unassigned" />
                                 <button type="submit" class="btn btn-sm btn-primary" style="font-size:.7rem;padding:3px 10px;white-space:nowrap">Send to Planner →</button>
                             </form>
                         </td>
