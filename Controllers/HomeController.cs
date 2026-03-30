@@ -272,7 +272,8 @@ public class HomeController : Controller
     // ─── PLANNER ───
     public async Task<IActionResult> Planner(string? filterCustomer, string? filterModel)
     {
-        var query = _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted);
+        var query = _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted &&
+            (j.Process1 != null || j.Process2 != null || j.Process3 != null || j.Process4 != null || j.Process5 != null));
         if (!string.IsNullOrEmpty(filterCustomer)) query = query.Where(j => j.Customer == filterCustomer);
         if (!string.IsNullOrEmpty(filterModel)) query = query.Where(j => j.Model == filterModel);
 
