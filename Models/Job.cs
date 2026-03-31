@@ -146,6 +146,22 @@ public class PlannerHistory
     public string TimestampFormatted => Timestamp.ToString("dd/MM/yyyy HH:mm:ss");
 }
 
+public class CapacityLedgerEntry
+{
+    [Key]
+    public int Id { get; set; }
+    public string EntryDate { get; set; } = string.Empty;   // dd/MM/yyyy
+    public string Serial { get; set; } = string.Empty;
+    public string Customer { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public string ModuleName { get; set; } = string.Empty;  // VMC, Milling, Lathe, Shaper
+    public string? MachineNumber { get; set; }
+    public int QtyProduced { get; set; }
+    public string? Notes { get; set; }
+    public string EnteredBy { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+}
+
 public class AppUser
 {
     [Key]

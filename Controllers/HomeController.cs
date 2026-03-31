@@ -525,6 +525,98 @@ public class HomeController : Controller
         return RedirectToAction("Finished");
     }
 
+    // ─── CAPACITY LEDGER ───
+    public async Task<IActionResult> CapacityLedger(string? fromDate, string? toDate)
+    {
+        var allEntries = await _db.CapacityLedgerEntries.OrderByDescending(e => e.CreatedAt).ToListAsync();
+
+        DateTime? from = null, to = null;
+        if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out var fd)) from = fd;
+        if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out var td)) to = td;
+
+        if (from.HasValue || to.HasValue)
+        {
+            allEntries = allEntries.Where(e =>
+            {
+                if (!DateTime.TryParseExact(e.EntryDate, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var entryDt))
+                    return true;
+                if (from.HasValue && entryDt < from.Value) return false;
+                if (to.HasValue && entryDt > to.Value) return false;
+                return true;
+            }).ToList();
+        }
+
+        var moduleTotals = allEntries
+            .GroupBy(e => e.ModuleName)
+            .ToDictionary(g => g.Key, g => g.Sum(e => e.QtyProduced));
+
+        var allJobs = await _db.Jobs.OrderBy(j => j.Serial).ToListAsync();
+
+        var vm = new CapacityLedgerViewModel
+        {
+            Entries = allEntries,
+            AllJobs = allJobs,
+            FromDate = fromDate,
+            ToDate = toDate,
+            ModuleTotals = moduleTotals
+        };
+
+        ViewBag.CurrentPage = "capacityledger";
+        return View(vm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddCapacityEntry(AddCapacityEntryModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.Serial) || string.IsNullOrWhiteSpace(model.ModuleName) ||
+            string.IsNullOrWhiteSpace(model.EntryDate) || model.QtyProduced <= 0)
+        {
+            TempData["Error"] = "Date, Serial, Module, and Qty Produced are required.";
+            return RedirectToAction("CapacityLedger");
+        }
+
+        // Look up job details
+        var job = await _db.Jobs.FirstOrDefaultAsync(j => j.Serial == model.Serial);
+        var customer = job?.Customer ?? "";
+        var jobModel = job?.Model ?? "";
+
+        // Parse date from yyyy-MM-dd to dd/MM/yyyy
+        var entryDate = model.EntryDate;
+        if (DateTime.TryParse(model.EntryDate, out var parsedDate))
+            entryDate = parsedDate.ToString("dd/MM/yyyy");
+
+        _db.CapacityLedgerEntries.Add(new CapacityLedgerEntry
+        {
+            EntryDate = entryDate,
+            Serial = model.Serial.Trim().ToUpper(),
+            Customer = customer,
+            Model = jobModel,
+            ModuleName = model.ModuleName,
+            MachineNumber = string.IsNullOrWhiteSpace(model.MachineNumber) ? null : model.MachineNumber.Trim(),
+            QtyProduced = model.QtyProduced,
+            Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim(),
+            EnteredBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Capacity entry recorded.";
+        return RedirectToAction("CapacityLedger");
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpPost]
+    public async Task<IActionResult> DeleteCapacityEntry(int id)
+    {
+        var entry = await _db.CapacityLedgerEntries.FindAsync(id);
+        if (entry != null)
+        {
+            _db.CapacityLedgerEntries.Remove(entry);
+            await _db.SaveChangesAsync();
+        }
+        return RedirectToAction("CapacityLedger");
+    }
+
     // ─── PRIORITY CASCADE ───
     private async Task CascadePriorities()
     {

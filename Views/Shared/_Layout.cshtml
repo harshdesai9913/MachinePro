@@ -30,10 +30,10 @@
             <span class="icon">◻</span>Dashboard
         </a>
         <a class="nav-item @(currentPage == "requests" ? "active" : "")" href="@Url.Action("Requests", "Home")">
-            <span class="icon">＋</span>Submit Request
+            <span class="icon">＋</span>Submit Orders
         </a>
         <a class="nav-item @(currentPage == "unassigned" ? "active" : "")" href="@Url.Action("Unassigned", "Home")">
-            <span class="icon">!</span>Unassigned Tasks
+            <span class="icon">!</span>Pending for Planning
         </a>
         <a class="nav-item @(currentPage == "planner" ? "active" : "")" href="@Url.Action("Planner", "Home")">
             <span class="icon">⚙</span>Planner
@@ -41,8 +41,12 @@
         <a class="nav-item @(currentPage == "tracker" ? "active" : "")" href="@Url.Action("Tracker", "Home")">
             <span class="icon">📈</span>Production Tracker
         </a>
+        <a class="nav-item @(currentPage == "capacityledger" ? "active" : "")" href="@Url.Action("CapacityLedger", "Home")">
+            <span class="icon">📊</span>Capacity Ledger
+        </a>
         @if (isManager)
         {
+            <div class="nav-section">Admin</div>
             <a class="nav-item @(currentPage == "history" ? "active" : "")" href="@Url.Action("History", "Home")">
                 <span class="icon">🕘</span>Planner History
             </a>

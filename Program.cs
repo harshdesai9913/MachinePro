@@ -54,6 +54,25 @@ using (var scope = app.Services.CreateScope())
     {
         if (!jobCols.Contains("ItemCode")) { cmd.CommandText = "ALTER TABLE Jobs ADD COLUMN ItemCode TEXT"; cmd.ExecuteNonQuery(); }
     }
+    // CapacityLedgerEntries migration
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = @"CREATE TABLE IF NOT EXISTS CapacityLedgerEntries (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            EntryDate TEXT NOT NULL,
+            Serial TEXT NOT NULL,
+            Customer TEXT NOT NULL,
+            Model TEXT NOT NULL,
+            ModuleName TEXT NOT NULL,
+            MachineNumber TEXT,
+            QtyProduced INTEGER NOT NULL,
+            Notes TEXT,
+            EnteredBy TEXT NOT NULL,
+            CreatedAt TEXT NOT NULL
+        )";
+        cmd.ExecuteNonQuery();
+    }
+
     conn.Close();
 }
 

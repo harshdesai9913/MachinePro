@@ -1,5 +1,5 @@
 @model RequestsPageViewModel
-@{ ViewData["Title"] = "SUBMIT REQUEST";
+@{ ViewData["Title"] = "SUBMIT ORDERS";
    var successMsg = TempData["Success"] as string;
    var errorMsg = TempData["Error"] as string;
 }
@@ -24,7 +24,7 @@
 </div>
 
 <div class="table-wrap" style="padding:24px">
-    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:20px;letter-spacing:1px">NEW PART REQUEST</h2>
+    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:20px;letter-spacing:1px">NEW PART ORDER</h2>
     <form method="post" asp-action="SubmitRequest">
         <div class="form-grid">
             <div class="form-group">
@@ -72,14 +72,14 @@
                 <input value="@Model.Today" readonly />
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit Request</button>
+        <button type="submit" class="btn btn-primary">Submit Order</button>
     </form>
 </div>
 
 <div style="margin-top:24px">
     <div class="table-wrap">
         <div class="table-header">
-            <h2>ALL REQUESTS</h2>
+            <h2>ALL ORDERS</h2>
             <span class="count">@Model.Jobs.Count entries</span>
         </div>
         <div class="table-scroll">

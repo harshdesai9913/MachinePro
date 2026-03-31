@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<CustomerMaster> CustomerMasters => Set<CustomerMaster>();
     public DbSet<ModelMaster> ModelMasters => Set<ModelMaster>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<CapacityLedgerEntry> CapacityLedgerEntries => Set<CapacityLedgerEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
