@@ -530,6 +530,14 @@ public class HomeController : Controller
     {
         var allEntries = await _db.CapacityLedgerEntries.OrderByDescending(e => e.CreatedAt).ToListAsync();
 
+        // Collect distinct machines from all entries before any filtering, for the filter dropdown
+        var distinctMachines = allEntries
+            .Where(e => !string.IsNullOrEmpty(e.MachineNumber))
+            .Select(e => e.MachineNumber!)
+            .Distinct()
+            .OrderBy(m => { int.TryParse(m, out int n); return n == 0 ? int.MaxValue : n; })
+            .ToList();
+
         DateTime? from = null, to = null;
         if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out var fd)) from = fd;
         if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out var td)) to = td;
@@ -554,13 +562,6 @@ public class HomeController : Controller
         var moduleTotals = allEntries
             .GroupBy(e => e.ModuleName)
             .ToDictionary(g => g.Key, g => g.Sum(e => e.QtyProduced));
-
-        var distinctMachines = allEntries
-            .Where(e => !string.IsNullOrEmpty(e.MachineNumber))
-            .Select(e => e.MachineNumber!)
-            .Distinct()
-            .OrderBy(m => m)
-            .ToList();
 
         var vm = new CapacityLedgerViewModel
         {

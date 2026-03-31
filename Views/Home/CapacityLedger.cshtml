@@ -21,7 +21,7 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:6px">
-            <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MODULE</label>
+            <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MACHINE CENTER</label>
             <select name="filterModule" style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px">
                 <option value="">All</option>
                 @foreach (var m in moduleOptions)
@@ -31,26 +31,23 @@
             </select>
         </div>
 
-        @if (Model.AvailableMachines.Any())
-        {
-            <div style="display:flex;align-items:center;gap:6px">
-                <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MACHINE</label>
-                <select name="filterMachine" style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px">
-                    <option value="">All</option>
-                    @foreach (var mn in Model.AvailableMachines)
-                    {
-                        <option value="@mn" selected="@(Model.FilterMachine == mn)">#@mn</option>
-                    }
-                </select>
-            </div>
-        }
+        <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MACHINE #</label>
+            <select name="filterMachine" style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px">
+                <option value="">All</option>
+                @foreach (var mn in Model.AvailableMachines)
+                {
+                    <option value="@mn" selected="@(Model.FilterMachine == mn)">#@mn</option>
+                }
+            </select>
+        </div>
 
         <button type="submit" class="btn btn-primary btn-sm" style="font-size:.72rem;padding:4px 12px">Apply</button>
         <a href="@Url.Action("CapacityLedger", "Home")" class="btn btn-sm" style="font-size:.72rem;padding:4px 12px">Clear</a>
     </form>
 </div>
 
-<!-- MODULE TOTALS SUMMARY -->
+<!-- MACHINE CENTER TOTALS SUMMARY -->
 @if (Model.ModuleTotals.Any())
 {
     <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">

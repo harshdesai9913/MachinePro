@@ -1,5 +1,5 @@
 @model ModuleViewModel
-@{ ViewData["Title"] = $"{Model.ModuleName.ToUpper()} MODULE"; }
+@{ ViewData["Title"] = $"{Model.ModuleName.ToUpper()} MACHINE CENTER"; }
 
 <style>
     .machine-filters { display:flex; flex-wrap:wrap; gap:6px; padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
@@ -31,7 +31,7 @@
         <img src="/images/Susha Logo.png" alt="Susha India" />
         <div>
             <div class="print-header-text">SUSHA PRODUCTION TRACKER</div>
-            <div class="print-header-sub">@Model.ModuleName.ToUpper() JOBS — Printed @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+            <div class="print-header-sub">@Model.ModuleName.ToUpper() MACHINE CENTER — Printed @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
         </div>
     </div>
     <div class="table-header">
