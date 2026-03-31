@@ -526,7 +526,7 @@ public class HomeController : Controller
     }
 
     // ─── CAPACITY LEDGER ───
-    public async Task<IActionResult> CapacityLedger(string? fromDate, string? toDate)
+    public async Task<IActionResult> CapacityLedger(string? fromDate, string? toDate, string? filterModule, string? filterMachine)
     {
         var allEntries = await _db.CapacityLedgerEntries.OrderByDescending(e => e.CreatedAt).ToListAsync();
 
@@ -546,62 +546,35 @@ public class HomeController : Controller
             }).ToList();
         }
 
+        if (!string.IsNullOrEmpty(filterModule))
+            allEntries = allEntries.Where(e => e.ModuleName == filterModule).ToList();
+        if (!string.IsNullOrEmpty(filterMachine))
+            allEntries = allEntries.Where(e => e.MachineNumber == filterMachine).ToList();
+
         var moduleTotals = allEntries
             .GroupBy(e => e.ModuleName)
             .ToDictionary(g => g.Key, g => g.Sum(e => e.QtyProduced));
 
-        var allJobs = await _db.Jobs.OrderBy(j => j.Serial).ToListAsync();
+        var distinctMachines = allEntries
+            .Where(e => !string.IsNullOrEmpty(e.MachineNumber))
+            .Select(e => e.MachineNumber!)
+            .Distinct()
+            .OrderBy(m => m)
+            .ToList();
 
         var vm = new CapacityLedgerViewModel
         {
             Entries = allEntries,
-            AllJobs = allJobs,
             FromDate = fromDate,
             ToDate = toDate,
-            ModuleTotals = moduleTotals
+            FilterModule = filterModule,
+            FilterMachine = filterMachine,
+            ModuleTotals = moduleTotals,
+            AvailableMachines = distinctMachines
         };
 
         ViewBag.CurrentPage = "capacityledger";
         return View(vm);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> AddCapacityEntry(AddCapacityEntryModel model)
-    {
-        if (string.IsNullOrWhiteSpace(model.Serial) || string.IsNullOrWhiteSpace(model.ModuleName) ||
-            string.IsNullOrWhiteSpace(model.EntryDate) || model.QtyProduced <= 0)
-        {
-            TempData["Error"] = "Date, Serial, Module, and Qty Produced are required.";
-            return RedirectToAction("CapacityLedger");
-        }
-
-        // Look up job details
-        var job = await _db.Jobs.FirstOrDefaultAsync(j => j.Serial == model.Serial);
-        var customer = job?.Customer ?? "";
-        var jobModel = job?.Model ?? "";
-
-        // Parse date from yyyy-MM-dd to dd/MM/yyyy
-        var entryDate = model.EntryDate;
-        if (DateTime.TryParse(model.EntryDate, out var parsedDate))
-            entryDate = parsedDate.ToString("dd/MM/yyyy");
-
-        _db.CapacityLedgerEntries.Add(new CapacityLedgerEntry
-        {
-            EntryDate = entryDate,
-            Serial = model.Serial.Trim().ToUpper(),
-            Customer = customer,
-            Model = jobModel,
-            ModuleName = model.ModuleName,
-            MachineNumber = string.IsNullOrWhiteSpace(model.MachineNumber) ? null : model.MachineNumber.Trim(),
-            QtyProduced = model.QtyProduced,
-            Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim(),
-            EnteredBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
-            CreatedAt = DateTime.Now
-        });
-        await _db.SaveChangesAsync();
-
-        TempData["Success"] = "Capacity entry recorded.";
-        return RedirectToAction("CapacityLedger");
     }
 
     [Authorize(Roles = "Manager")]
@@ -999,6 +972,20 @@ public class HomeController : Controller
 
         entry.FinishedQty = newTotal;
         entry.FinishedDate = DateTime.Now.ToString("dd/MM/yyyy");
+
+        // Auto-create capacity ledger entry
+        _db.CapacityLedgerEntries.Add(new CapacityLedgerEntry
+        {
+            EntryDate = DateTime.Now.ToString("dd/MM/yyyy"),
+            Serial = job.Serial,
+            Customer = job.Customer,
+            Model = job.Model,
+            ModuleName = ModuleName,
+            MachineNumber = entry.MachineNumber,
+            QtyProduced = RecordQty,
+            EnteredBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
+            CreatedAt = DateTime.Now
+        });
 
         // Auto-finish when full qty is reached
         if (newTotal == job.Qty)

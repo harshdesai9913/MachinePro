@@ -91,16 +91,17 @@
                             }
                             else if (mj.ModuleEntryId.HasValue)
                             {
-                                <form method="post" asp-action="SetMachine" style="display:inline">
+                                <form method="post" asp-action="SetMachine" style="display:inline-flex;align-items:center;gap:4px">
                                     <input type="hidden" name="moduleEntryId" value="@mj.ModuleEntryId" />
                                     <input type="hidden" name="moduleName" value="@Model.ModuleName" />
-                                    <select name="machineNumber" onchange="this.form.submit()">
+                                    <select name="machineNumber">
                                         <option value="">—</option>
                                         @for (int i = 1; i <= Model.MachineCount; i++)
                                         {
                                             <option value="@i" selected="@(mj.MachineNumber == i.ToString())">@Model.ModuleName #@i</option>
                                         }
                                     </select>
+                                    <button type="submit" class="btn btn-sm btn-primary" style="padding:2px 7px;font-size:.65rem">✓</button>
                                 </form>
                             }
                         </td>

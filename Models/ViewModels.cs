@@ -157,19 +157,10 @@ public class AddModelModel
 public class CapacityLedgerViewModel
 {
     public List<CapacityLedgerEntry> Entries { get; set; } = new();
-    public List<Job> AllJobs { get; set; } = new();
-    public string? FromDate { get; set; }  // yyyy-MM-dd (HTML date input)
-    public string? ToDate { get; set; }    // yyyy-MM-dd (HTML date input)
-    // Per-module totals for the filtered period
+    public string? FromDate { get; set; }       // yyyy-MM-dd (HTML date input)
+    public string? ToDate { get; set; }         // yyyy-MM-dd (HTML date input)
+    public string? FilterModule { get; set; }
+    public string? FilterMachine { get; set; }
     public Dictionary<string, int> ModuleTotals { get; set; } = new();
-}
-
-public class AddCapacityEntryModel
-{
-    public string EntryDate { get; set; } = string.Empty;   // yyyy-MM-dd from HTML date input
-    public string Serial { get; set; } = string.Empty;
-    public string ModuleName { get; set; } = string.Empty;
-    public string? MachineNumber { get; set; }
-    public int QtyProduced { get; set; }
-    public string? Notes { get; set; }
+    public List<string> AvailableMachines { get; set; } = new();
 }

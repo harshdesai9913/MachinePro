@@ -1,24 +1,14 @@
 @model MachinePro.Models.CapacityLedgerViewModel
 @{ ViewData["Title"] = "CAPACITY LEDGER";
-   var successMsg = TempData["Success"] as string;
-   var errorMsg = TempData["Error"] as string;
    var isManager = User.IsInRole("Manager");
    var moduleOptions = new[] { "VMC", "Milling", "Lathe", "Shaper" };
 }
 
-@if (!string.IsNullOrEmpty(successMsg))
-{
-    <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--green);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">✓ @successMsg</div>
-}
-@if (!string.IsNullOrEmpty(errorMsg))
-{
-    <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--red);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">✕ @errorMsg</div>
-}
-
-<!-- DATE FILTER -->
+<!-- FILTERS -->
 <div class="table-wrap" style="padding:16px 20px;margin-bottom:12px">
     <form method="get" asp-action="CapacityLedger" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text2);letter-spacing:1px">DATE FILTER</span>
+        <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text2);letter-spacing:1px">FILTER</span>
+
         <div style="display:flex;align-items:center;gap:6px">
             <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">FROM</label>
             <input type="date" name="fromDate" value="@Model.FromDate"
@@ -29,6 +19,32 @@
             <input type="date" name="toDate" value="@Model.ToDate"
                    style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px" />
         </div>
+
+        <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MODULE</label>
+            <select name="filterModule" style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px">
+                <option value="">All</option>
+                @foreach (var m in moduleOptions)
+                {
+                    <option value="@m" selected="@(Model.FilterModule == m)">@m</option>
+                }
+            </select>
+        </div>
+
+        @if (Model.AvailableMachines.Any())
+        {
+            <div style="display:flex;align-items:center;gap:6px">
+                <label style="font-size:.72rem;color:var(--text3);font-family:var(--font-mono)">MACHINE</label>
+                <select name="filterMachine" style="font-size:.75rem;font-family:var(--font-mono);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:4px 8px">
+                    <option value="">All</option>
+                    @foreach (var mn in Model.AvailableMachines)
+                    {
+                        <option value="@mn" selected="@(Model.FilterMachine == mn)">#@mn</option>
+                    }
+                </select>
+            </div>
+        }
+
         <button type="submit" class="btn btn-primary btn-sm" style="font-size:.72rem;padding:4px 12px">Apply</button>
         <a href="@Url.Action("CapacityLedger", "Home")" class="btn btn-sm" style="font-size:.72rem;padding:4px 12px">Clear</a>
     </form>
@@ -55,7 +71,7 @@
 }
 
 <!-- ENTRIES TABLE -->
-<div class="table-wrap" style="margin-bottom:20px">
+<div class="table-wrap">
     <div class="table-header">
         <h2>LEDGER ENTRIES</h2>
         <span class="count">@Model.Entries.Count entries</span>
@@ -71,7 +87,6 @@
                     <th>Module</th>
                     <th>Machine</th>
                     <th>Qty Produced</th>
-                    <th>Notes</th>
                     <th>Entered By</th>
                     @if (isManager) { <th>Del</th> }
                 </tr>
@@ -79,7 +94,7 @@
             <tbody>
                 @if (!Model.Entries.Any())
                 {
-                    <tr><td colspan="@(isManager ? 10 : 9)" style="text-align:center;color:var(--text3);padding:24px;font-family:var(--font-mono);font-size:.8rem">No entries found for the selected period.</td></tr>
+                    <tr><td colspan="@(isManager ? 9 : 8)" style="text-align:center;color:var(--text3);padding:24px;font-family:var(--font-mono);font-size:.8rem">No entries found for the selected filters.</td></tr>
                 }
                 @foreach (var e in Model.Entries)
                 {
@@ -89,9 +104,8 @@
                         <td>@e.Customer</td>
                         <td style="font-size:.78rem">@e.Model</td>
                         <td><span style="font-family:var(--font-mono);font-size:.75rem;background:var(--surface2);padding:2px 8px;border-radius:var(--radius);border:1px solid var(--border)">@e.ModuleName</span></td>
-                        <td style="font-family:var(--font-mono);font-size:.78rem">@(e.MachineNumber ?? "—")</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem">@(string.IsNullOrEmpty(e.MachineNumber) ? "—" : $"#{e.MachineNumber}")</td>
                         <td style="font-family:var(--font-mono);font-weight:600;color:var(--accent)">@e.QtyProduced</td>
-                        <td style="font-size:.75rem;color:var(--text2)">@(e.Notes ?? "—")</td>
                         <td style="font-size:.75rem;color:var(--text2)">@e.EnteredBy</td>
                         @if (isManager)
                         {
@@ -108,50 +122,4 @@
             </tbody>
         </table>
     </div>
-</div>
-
-<!-- ADD ENTRY FORM -->
-<div class="table-wrap" style="padding:24px">
-    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:20px;letter-spacing:1px">RECORD OUTPUT</h2>
-    <form method="post" asp-action="AddCapacityEntry">
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" name="EntryDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
-            </div>
-            <div class="form-group">
-                <label>Job Serial</label>
-                <select name="Serial" required>
-                    <option value="">— Select Job —</option>
-                    @foreach (var j in Model.AllJobs)
-                    {
-                        <option value="@j.Serial">@j.Serial — @j.Customer (@j.Drawing)</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Module</label>
-                <select name="ModuleName" required>
-                    <option value="">— Select Module —</option>
-                    @foreach (var m in moduleOptions)
-                    {
-                        <option value="@m">@m</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Machine Number</label>
-                <input name="MachineNumber" placeholder="e.g. 1" />
-            </div>
-            <div class="form-group">
-                <label>Qty Produced</label>
-                <input name="QtyProduced" type="number" min="1" placeholder="e.g. 5" required />
-            </div>
-            <div class="form-group">
-                <label>Notes</label>
-                <input name="Notes" placeholder="Optional remarks" />
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Record Entry</button>
-    </form>
 </div>
