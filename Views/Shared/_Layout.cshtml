@@ -110,5 +110,20 @@
     </div>
 }
 
+<script>
+    (function () {
+        var nav = document.querySelector('.sidebar-nav');
+        if (!nav) return;
+        // Restore saved scroll position immediately (before paint)
+        var saved = sessionStorage.getItem('sidebarScroll');
+        if (saved) nav.scrollTop = parseInt(saved, 10);
+        // Save scroll position on every nav-item click
+        document.querySelectorAll('.nav-item').forEach(function (a) {
+            a.addEventListener('click', function () {
+                sessionStorage.setItem('sidebarScroll', nav.scrollTop);
+            });
+        });
+    })();
+</script>
 </body>
 </html>
