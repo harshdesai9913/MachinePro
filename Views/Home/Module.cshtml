@@ -50,10 +50,10 @@
     </div>
 
     <div class="machine-filters">
-        <button class="mf-btn active" onclick="setFilter(this, 'all')">All</button>
+        <button class="mf-btn active" data-filter="all" onclick="setFilter(this)">All</button>
         @for (int i = 1; i <= Model.MachineCount; i++)
         {
-            <button class="mf-btn" onclick="setFilter(this, '@i')">@Model.ModuleName #@i</button>
+            <button class="mf-btn" data-filter="@i" onclick="setFilter(this)">@Model.ModuleName #@i</button>
         }
     </div>
 
@@ -173,15 +173,33 @@
 </div>
 
 <script>
-    function setFilter(btn, filter) {
-        document.querySelectorAll('.mf-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function setFilter(btn) {
+        const filter = btn.dataset.filter;
+        const allBtn = document.querySelector('.mf-btn[data-filter="all"]');
+
+        if (filter === 'all') {
+            document.querySelectorAll('.mf-btn').forEach(b => b.classList.remove('active'));
+            allBtn.classList.add('active');
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+            return;
+        }
+
+        btn.classList.toggle('active');
+        allBtn.classList.remove('active');
+
+        const activeFilters = new Set();
+        document.querySelectorAll('.mf-btn.active').forEach(b => {
+            if (b.dataset.filter !== 'all') activeFilters.add(b.dataset.filter);
+        });
+
+        if (activeFilters.size === 0) {
+            allBtn.classList.add('active');
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+            return;
+        }
+
         document.querySelectorAll('tbody tr').forEach(row => {
-            if (filter === 'all') {
-                row.style.display = '';
-            } else {
-                row.style.display = (row.dataset.machine === filter) ? '' : 'none';
-            }
+            row.style.display = activeFilters.has(row.dataset.machine) ? '' : 'none';
         });
     }
 </script>
