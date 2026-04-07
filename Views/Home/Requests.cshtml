@@ -85,7 +85,7 @@
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Date</th></tr>
+                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Date</th><th>Machines</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var j in Model.Jobs)
@@ -99,6 +99,21 @@
                             <td style="font-size:.78rem;color:var(--text2)">@(j.DrawingDescription ?? "—")</td>
                             <td>@j.Qty</td>
                             <td>@j.InwardDate</td>
+                            <td style="font-family:var(--font-mono);font-size:.72rem">
+                                @{
+                                    var machineList = j.ModuleEntries
+                                        .Where(e => !string.IsNullOrEmpty(e.MachineNumber))
+                                        .Select(e => $"{e.ModuleName} #{e.MachineNumber}");
+                                }
+                                @if (machineList.Any())
+                                {
+                                    @string.Join(", ", machineList)
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text3)">—</span>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>

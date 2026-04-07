@@ -73,6 +73,7 @@ public class ProcessChip
     public int RemainingQty { get; set; }
     public int TotalQty { get; set; }
     public int FinishedQty { get; set; }
+    public string? MachineNumber { get; set; }
 }
 
 public class FinishedViewModel
@@ -114,6 +115,11 @@ public class SavePlannerModel
     public string? Process3 { get; set; }
     public string? Process4 { get; set; }
     public string? Process5 { get; set; }
+    public string? Machine1 { get; set; }
+    public string? Machine2 { get; set; }
+    public string? Machine3 { get; set; }
+    public string? Machine4 { get; set; }
+    public string? Machine5 { get; set; }
     public int? Priority { get; set; }
     public string Role { get; set; } = "planner";
     public string? ReturnTo { get; set; }

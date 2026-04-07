@@ -85,7 +85,7 @@ public class HomeController : Controller
     // ─── SUBMIT REQUEST ───
     public async Task<IActionResult> Requests()
     {
-        var jobs = await _db.Jobs.OrderBy(j => j.Id).ToListAsync();
+        var jobs = await _db.Jobs.Include(j => j.ModuleEntries).OrderBy(j => j.Id).ToListAsync();
         var customers = await _db.CustomerMasters.OrderBy(c => c.CustomerName).ToListAsync();
         var models = await _db.ModelMasters.OrderBy(m => m.ModelName).ToListAsync();
 
@@ -381,6 +381,18 @@ public class HomeController : Controller
         var toRemove = job.ModuleEntries.Where(e => !currentModules.Contains(e.ModuleName)).ToList();
         _db.ModuleEntries.RemoveRange(toRemove);
 
+        // Save machine numbers per process slot
+        var newProcsForMachines = new[] { model.Process1, model.Process2, model.Process3, model.Process4, model.Process5 };
+        var machines = new[] { model.Machine1, model.Machine2, model.Machine3, model.Machine4, model.Machine5 };
+        for (int i = 0; i < 5; i++)
+        {
+            var proc = string.IsNullOrEmpty(newProcsForMachines[i]) ? null : newProcsForMachines[i];
+            if (proc == null || proc == "Other") continue;
+            var entry = job.ModuleEntries.FirstOrDefault(e => e.ModuleName == proc);
+            if (entry != null)
+                entry.MachineNumber = string.IsNullOrEmpty(machines[i]) ? null : machines[i];
+        }
+
         await _db.SaveChangesAsync();
         return RedirectToAction(model.ReturnTo == "Unassigned" ? "Unassigned" : "Planner");
     }
@@ -426,7 +438,8 @@ public class HomeController : Controller
                         IsDone = entry?.IsFinished ?? false,
                         TotalQty = j.Qty,
                         FinishedQty = finQty,
-                        RemainingQty = j.Qty - finQty
+                        RemainingQty = j.Qty - finQty,
+                        MachineNumber = entry?.MachineNumber
                     };
                 }).ToList();
 
