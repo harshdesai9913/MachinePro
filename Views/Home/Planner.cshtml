@@ -2,7 +2,7 @@
 @{ ViewData["Title"] = "PLANNER"; }
 
 @{
-    var processOptions = new[] { "", "VMC", "Milling", "Lathe", "Shaper", "Fabrication", "Other" };
+    var processOptions = new[] { "", "VMC", "Milling", "Lathe", "Shaper", "Other" };
 }
 
 <div class="table-wrap">
@@ -48,20 +48,13 @@
                         @for (int pi = 0; pi < 5; pi++)
                         {
                             var currentVal = job.GetProcessAt(pi) ?? "";
-                            var machineEntry = (!string.IsNullOrEmpty(currentVal) && currentVal != "Other")
-                                ? job.ModuleEntries.FirstOrDefault(e => e.ModuleName == currentVal)
-                                : null;
-                            var currentMachine = machineEntry?.MachineNumber ?? "";
-                            <td style="white-space:nowrap">
+                            <td>
                                 <select form="form-@job.Id" name="Process@(pi + 1)" style="padding:2px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.75rem">
                                     @foreach (var opt in processOptions)
                                     {
                                         <option value="@opt" selected="@(opt == currentVal)">@(string.IsNullOrEmpty(opt) ? "—" : opt)</option>
                                     }
                                 </select>
-                                <input type="number" form="form-@job.Id" name="Machine@(pi + 1)"
-                                       value="@currentMachine" min="1" max="9" placeholder="#"
-                                       style="width:42px;padding:2px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--orange);font-family:var(--font-mono);font-size:.75rem;text-align:center" />
                             </td>
                         }
                         <td>

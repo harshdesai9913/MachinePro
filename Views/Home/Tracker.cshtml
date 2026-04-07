@@ -46,10 +46,6 @@
                                     <span class="chip @(chip.IsDone ? "chip-green" : "chip-red")" style="margin-right:4px"
                                           title="@(chip.IsDone ? "Done" : $"Remaining: {chip.RemainingQty}")">
                                         @chip.Name
-                                        @if (!string.IsNullOrEmpty(chip.MachineNumber))
-                                        {
-                                            <span style="font-size:.6rem;opacity:.75;font-family:var(--font-mono)"> #@chip.MachineNumber</span>
-                                        }
                                         @if (!chip.IsDone && chip.RemainingQty > 0)
                                         {
                                             <span style="font-size:.6rem;opacity:.8"> (@chip.RemainingQty)</span>
