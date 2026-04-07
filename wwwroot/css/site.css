@@ -48,7 +48,7 @@ body { font-family: var(--font-sans); background: var(--bg); color: var(--text);
 a { text-decoration: none; color: inherit; }
 
 /* SIDEBAR */
-.sidebar { width: 150px; min-width: 150px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; }
+.sidebar { width: 165px; min-width: 165px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; }
 .sidebar-brand { padding: 16px 12px; border-bottom: 1px solid var(--border); font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: 3px; color: #363d3d; text-align: center; background: #BFC6C4; -webkit-text-stroke: 0.6px #363d3d; }
 .sidebar-brand span { color: var(--text3); font-weight: 400; font-size: .7rem; display: block; margin-top: 2px; letter-spacing: 1px; }
 .sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
