@@ -37,7 +37,7 @@
     <div class="table-header">
         <div style="display:flex;align-items:center;gap:12px">
             <h2>@Model.ModuleName.ToUpper() JOBS</h2>
-            <span class="count">@Model.Jobs.Count entries</span>
+            <span class="count" id="entry-count">@Model.Jobs.Count entries</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             @{ ViewBag.FilterAction = "Module"; ViewBag.FilterExtra = new Dictionary<string, string> { { "name", Model.ModuleName } }; }
@@ -50,11 +50,16 @@
     </div>
 
     <div class="machine-filters">
-        <button class="mf-btn active" data-filter="all" onclick="setFilter(this)">All</button>
+        <button class="mf-btn active" data-filter="all" onclick="setMachineFilter(this)">All Machines</button>
         @for (int i = 1; i <= Model.MachineCount; i++)
         {
-            <button class="mf-btn" data-filter="@i" onclick="setFilter(this)">@Model.ModuleName #@i</button>
+            <button class="mf-btn" data-filter="@i" onclick="setMachineFilter(this)">@Model.ModuleName #@i</button>
         }
+        <span style="color:var(--border);margin:0 4px;font-size:1rem;align-self:center">|</span>
+        <button class="mf-btn sf-btn" data-status="all-status" onclick="setStatusFilter(this)">All Status</button>
+        <button class="mf-btn sf-btn active" data-status="not-started" onclick="setStatusFilter(this)">Not Started</button>
+        <button class="mf-btn sf-btn active" data-status="in-progress" onclick="setStatusFilter(this)">In Progress</button>
+        <button class="mf-btn sf-btn" data-status="done" onclick="setStatusFilter(this)">Done</button>
     </div>
 
     <div class="table-scroll">
@@ -71,7 +76,8 @@
                     var done = mj.FinishedQty ?? 0;
                     var remaining = mj.Qty - done;
                     var pct = mj.Qty > 0 ? (int)((double)done / mj.Qty * 100) : 0;
-                    <tr data-machine="@(mj.MachineNumber ?? "")">
+                    var rowStatus = mj.IsFinished ? "done" : (done > 0 ? "in-progress" : "not-started");
+                    <tr data-machine="@(mj.MachineNumber ?? "")" data-status="@rowStatus">
                         <td class="serial-cell">@mj.Serial</td>
                         <td>@mj.Customer</td>
                         <td>@mj.Model</td>
@@ -173,33 +179,60 @@
 </div>
 
 <script>
-    function setFilter(btn) {
+    let activeMachineFilters = new Set(); // empty = all machines
+    let activeStatusFilters = new Set(['not-started', 'in-progress']); // default
+
+    function applyFilters() {
+        const rows = document.querySelectorAll('tbody tr');
+        let visible = 0;
+        rows.forEach(row => {
+            const machineOk = activeMachineFilters.size === 0 || activeMachineFilters.has(row.dataset.machine);
+            const statusOk = activeStatusFilters.size === 0 || activeStatusFilters.has(row.dataset.status);
+            const show = machineOk && statusOk;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('entry-count').textContent = visible + ' entries';
+    }
+
+    function setMachineFilter(btn) {
         const filter = btn.dataset.filter;
         const allBtn = document.querySelector('.mf-btn[data-filter="all"]');
-
         if (filter === 'all') {
-            document.querySelectorAll('.mf-btn').forEach(b => b.classList.remove('active'));
+            activeMachineFilters.clear();
+            document.querySelectorAll('.mf-btn[data-filter]').forEach(b => b.classList.remove('active'));
             allBtn.classList.add('active');
-            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
-            return;
+        } else {
+            btn.classList.toggle('active');
+            allBtn.classList.remove('active');
+            if (btn.classList.contains('active')) activeMachineFilters.add(filter);
+            else activeMachineFilters.delete(filter);
+            if (activeMachineFilters.size === 0) {
+                allBtn.classList.add('active');
+            }
         }
-
-        btn.classList.toggle('active');
-        allBtn.classList.remove('active');
-
-        const activeFilters = new Set();
-        document.querySelectorAll('.mf-btn.active').forEach(b => {
-            if (b.dataset.filter !== 'all') activeFilters.add(b.dataset.filter);
-        });
-
-        if (activeFilters.size === 0) {
-            allBtn.classList.add('active');
-            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
-            return;
-        }
-
-        document.querySelectorAll('tbody tr').forEach(row => {
-            row.style.display = activeFilters.has(row.dataset.machine) ? '' : 'none';
-        });
+        applyFilters();
     }
+
+    function setStatusFilter(btn) {
+        const status = btn.dataset.status;
+        const allBtn = document.querySelector('.sf-btn[data-status="all-status"]');
+        if (status === 'all-status') {
+            activeStatusFilters.clear();
+            document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
+            allBtn.classList.add('active');
+        } else {
+            allBtn.classList.remove('active');
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) activeStatusFilters.add(status);
+            else activeStatusFilters.delete(status);
+            if (activeStatusFilters.size === 0) {
+                activeStatusFilters.clear();
+                allBtn.classList.add('active');
+            }
+        }
+        applyFilters();
+    }
+
+    document.addEventListener('DOMContentLoaded', applyFilters);
 </script>
