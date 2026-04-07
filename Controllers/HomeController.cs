@@ -764,16 +764,27 @@ public class HomeController : Controller
         {
             var line = await reader.ReadLineAsync();
             lineNumber++;
-            if (lineNumber == 1) continue;
-
+            if (lineNumber == 1) continue; // skip header
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var customerName = line.Split(',')[0].Trim().Trim('"');
+            var cols = ParseCsvRow(line);
+            var customerName = cols.ElementAtOrDefault(0)?.Trim() ?? "";
+            var city         = cols.ElementAtOrDefault(1)?.Trim();
+            var state        = cols.ElementAtOrDefault(2)?.Trim();
+            var country      = cols.ElementAtOrDefault(3)?.Trim();
+            if (string.IsNullOrEmpty(country)) country = "India";
+
             if (string.IsNullOrEmpty(customerName)) continue;
 
             if (!await _db.CustomerMasters.AnyAsync(c => c.CustomerName == customerName))
             {
-                _db.CustomerMasters.Add(new CustomerMaster { CustomerName = customerName });
+                _db.CustomerMasters.Add(new CustomerMaster
+                {
+                    CustomerName = customerName,
+                    City = string.IsNullOrEmpty(city) ? null : city,
+                    State = string.IsNullOrEmpty(state) ? null : state,
+                    Country = country
+                });
                 added++;
             }
         }

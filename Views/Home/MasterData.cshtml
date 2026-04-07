@@ -21,7 +21,7 @@
         <div class="table-wrap" style="padding:20px;margin-bottom:16px">
             <h2 style="font-family:var(--font-mono);font-size:.85rem;color:var(--white);margin-bottom:6px;letter-spacing:1px">UPLOAD CUSTOMERS</h2>
             <p style="font-size:.72rem;color:var(--text3);margin-bottom:12px">
-                CSV with one column: <strong>CustomerName</strong>
+                Columns: <strong>Customer Name · City · State · Country</strong> — City, State, Country are optional (Country defaults to India)
             </p>
             <form method="post" asp-action="UploadCustomerCsv" enctype="multipart/form-data" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <input type="file" name="csvFile" accept=".csv" required
