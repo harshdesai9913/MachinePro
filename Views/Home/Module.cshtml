@@ -50,16 +50,19 @@
     </div>
 
     <div class="machine-filters">
+        <select id="statusFilter" onchange="applyFilters()" style="padding:3px 8px;font-size:.7rem;font-family:var(--font-mono);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);cursor:pointer;height:26px">
+            <option value="active" selected>Active (Not Started + In Progress)</option>
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="done">Done</option>
+            <option value="all">All Status</option>
+        </select>
+        <span style="color:var(--border);margin:0 4px;font-size:1rem;align-self:center">|</span>
         <button class="mf-btn active" data-filter="all" onclick="setMachineFilter(this)">All Machines</button>
         @for (int i = 1; i <= Model.MachineCount; i++)
         {
             <button class="mf-btn" data-filter="@i" onclick="setMachineFilter(this)">@Model.ModuleName #@i</button>
         }
-        <span style="color:var(--border);margin:0 4px;font-size:1rem;align-self:center">|</span>
-        <button class="mf-btn sf-btn" data-status="all-status" onclick="setStatusFilter(this)">All Status</button>
-        <button class="mf-btn sf-btn active" data-status="not-started" onclick="setStatusFilter(this)">Not Started</button>
-        <button class="mf-btn sf-btn active" data-status="in-progress" onclick="setStatusFilter(this)">In Progress</button>
-        <button class="mf-btn sf-btn" data-status="done" onclick="setStatusFilter(this)">Done</button>
     </div>
 
     <div class="table-scroll">
@@ -180,14 +183,18 @@
 
 <script>
     let activeMachineFilters = new Set(); // empty = all machines
-    let activeStatusFilters = new Set(['not-started', 'in-progress']); // default
 
     function applyFilters() {
+        const val = document.getElementById('statusFilter').value;
+        const allowedStatuses = val === 'all'          ? null
+                              : val === 'active'       ? new Set(['not-started', 'in-progress'])
+                              : new Set([val]);
+
         const rows = document.querySelectorAll('tbody tr');
         let visible = 0;
         rows.forEach(row => {
             const machineOk = activeMachineFilters.size === 0 || activeMachineFilters.has(row.dataset.machine);
-            const statusOk = activeStatusFilters.size === 0 || activeStatusFilters.has(row.dataset.status);
+            const statusOk  = allowedStatuses === null || allowedStatuses.has(row.dataset.status);
             const show = machineOk && statusOk;
             row.style.display = show ? '' : 'none';
             if (show) visible++;
@@ -207,29 +214,7 @@
             allBtn.classList.remove('active');
             if (btn.classList.contains('active')) activeMachineFilters.add(filter);
             else activeMachineFilters.delete(filter);
-            if (activeMachineFilters.size === 0) {
-                allBtn.classList.add('active');
-            }
-        }
-        applyFilters();
-    }
-
-    function setStatusFilter(btn) {
-        const status = btn.dataset.status;
-        const allBtn = document.querySelector('.sf-btn[data-status="all-status"]');
-        if (status === 'all-status') {
-            activeStatusFilters.clear();
-            document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
-            allBtn.classList.add('active');
-        } else {
-            allBtn.classList.remove('active');
-            btn.classList.toggle('active');
-            if (btn.classList.contains('active')) activeStatusFilters.add(status);
-            else activeStatusFilters.delete(status);
-            if (activeStatusFilters.size === 0) {
-                activeStatusFilters.clear();
-                allBtn.classList.add('active');
-            }
+            if (activeMachineFilters.size === 0) allBtn.classList.add('active');
         }
         applyFilters();
     }

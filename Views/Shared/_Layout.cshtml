@@ -86,6 +86,9 @@
         <a class="nav-item @(currentPage == "shaper" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "Shaper" })">
             <span class="icon">▦</span>Shaper
         </a>
+        <a class="nav-item @(currentPage == "fabrication" ? "active" : "")" href="@Url.Action("Module", "Home", new { name = "Fabrication" })">
+            <span class="icon">▧</span>Fabrication
+        </a>
         <div class="nav-section">Completed</div>
         <a class="nav-item @(currentPage == "finished" ? "active" : "")" href="@Url.Action("Finished", "Home")">
             <span class="icon">✓</span>Finished

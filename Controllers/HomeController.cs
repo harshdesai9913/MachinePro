@@ -17,7 +17,7 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         var jobs = await _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted).ToListAsync();
-        var moduleTypes = new[] { "VMC", "Milling", "Lathe", "Shaper" };
+        var moduleTypes = new[] { "VMC", "Milling", "Lathe", "Shaper", "Fabrication" };
 
         int unassigned = 0, pending = 0;
         var moduleBreakdown = moduleTypes.ToDictionary(m => m, _ => new ModuleStats());
@@ -823,7 +823,7 @@ public class HomeController : Controller
     {
         var machineCount = name switch
         {
-            "VMC" => 4, "Milling" => 3, "Lathe" => 4, "Shaper" => 1, _ => 1
+            "VMC" => 4, "Milling" => 3, "Lathe" => 4, "Shaper" => 1, "Fabrication" => 2, _ => 1
         };
 
         var query = _db.Jobs.Include(j => j.ModuleEntries).Where(j => !j.IsCompleted);
