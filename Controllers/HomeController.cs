@@ -985,6 +985,7 @@ public class HomeController : Controller
             Model = job.Model,
             ModuleName = ModuleName,
             MachineNumber = entry.MachineNumber,
+            MachineBuildNumber = job.MachineBuildNumber,
             QtyProduced = RecordQty,
             EnteredBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
             CreatedAt = DateTime.Now

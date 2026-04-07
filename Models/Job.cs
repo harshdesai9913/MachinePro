@@ -127,6 +127,7 @@ public class ModuleEntry
     public string ModuleName { get; set; } = string.Empty;
 
     public string? MachineNumber { get; set; }
+    public string? MachineBuildNumber { get; set; }
     public bool IsFinished { get; set; }
     public int? FinishedQty { get; set; }
     public string? FinishedDate { get; set; }
@@ -158,6 +159,7 @@ public class CapacityLedgerEntry
     public string Model { get; set; } = string.Empty;
     public string ModuleName { get; set; } = string.Empty;  // VMC, Milling, Lathe, Shaper
     public string? MachineNumber { get; set; }
+    public string? MachineBuildNumber { get; set; }
     public int QtyProduced { get; set; }
     public string? Notes { get; set; }
     public string EnteredBy { get; set; } = string.Empty;

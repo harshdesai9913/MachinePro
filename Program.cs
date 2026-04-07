@@ -74,6 +74,19 @@ using (var scope = app.Services.CreateScope())
         cmd.ExecuteNonQuery();
     }
 
+    // CapacityLedgerEntries column migrations
+    var capCols = new List<string>();
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = "PRAGMA table_info(CapacityLedgerEntries)";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read()) capCols.Add(reader.GetString(1));
+    }
+    using (var cmd = conn.CreateCommand())
+    {
+        if (!capCols.Contains("MachineBuildNumber")) { cmd.CommandText = "ALTER TABLE CapacityLedgerEntries ADD COLUMN MachineBuildNumber TEXT"; cmd.ExecuteNonQuery(); }
+    }
+
     conn.Close();
 }
 
