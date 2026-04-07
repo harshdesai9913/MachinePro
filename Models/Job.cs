@@ -44,6 +44,8 @@ public class Job
 
     public string? ItemCode { get; set; }
 
+    public string? MachineBuildNumber { get; set; }
+
     public string? DrawingDescription { get; set; }
 
     [Required]

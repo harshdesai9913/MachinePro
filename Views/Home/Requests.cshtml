@@ -60,6 +60,10 @@
                 <input name="ItemCode" placeholder="e.g. IC-4401" />
             </div>
             <div class="form-group">
+                <label>Machine Build Number</label>
+                <input name="MachineBuildNumber" placeholder="e.g. MB-001" />
+            </div>
+            <div class="form-group">
                 <label>Drawing Description</label>
                 <input name="DrawingDescription" placeholder="e.g. Engine block housing plate" />
             </div>
@@ -85,7 +89,7 @@
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Date</th></tr>
+                    <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Machine Build #</th><th>Description</th><th>Qty</th><th>Date</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var j in Model.Jobs)
@@ -96,6 +100,7 @@
                             <td>@j.Model</td>
                             <td>@j.Drawing</td>
                             <td style="font-family:var(--font-mono);font-size:.78rem">@(j.ItemCode ?? "—")</td>
+                            <td style="font-family:var(--font-mono);font-size:.78rem;color:var(--orange)">@(j.MachineBuildNumber ?? "—")</td>
                             <td style="font-size:.78rem;color:var(--text2)">@(j.DrawingDescription ?? "—")</td>
                             <td>@j.Qty</td>
                             <td>@j.InwardDate</td>

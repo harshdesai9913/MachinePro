@@ -69,7 +69,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Serial</th><th>Customer</th><th>Model</th><th>Drawing No.</th><th>Item Code</th><th>Description</th><th>Total Qty</th><th>Step</th>
+                    <th>Serial</th><th>Customer</th><th>Model</th><th>Drawing No.</th><th>Item Code</th><th>Machine Build #</th><th>Description</th><th>Total Qty</th><th>Step</th>
                     <th>@Model.ModuleName #</th><th>Done</th><th>Remaining</th><th>Record Qty</th><th>Status</th><th>Last Updated</th>
                 </tr>
             </thead>
@@ -86,6 +86,7 @@
                         <td>@mj.Model</td>
                         <td style="font-family:var(--font-mono);font-size:.75rem">@mj.Drawing</td>
                         <td style="font-family:var(--font-mono);font-size:.75rem">@(mj.ItemCode ?? "—")</td>
+                        <td style="font-family:var(--font-mono);font-size:.75rem;color:var(--orange)">@(mj.MachineBuildNumber ?? "—")</td>
                         <td style="font-size:.75rem;color:var(--text2)">@mj.DrawingDescription</td>
                         <td>@mj.Qty</td>
                         <td>

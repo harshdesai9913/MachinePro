@@ -52,7 +52,8 @@ using (var scope = app.Services.CreateScope())
     }
     using (var cmd = conn.CreateCommand())
     {
-        if (!jobCols.Contains("ItemCode")) { cmd.CommandText = "ALTER TABLE Jobs ADD COLUMN ItemCode TEXT"; cmd.ExecuteNonQuery(); }
+        if (!jobCols.Contains("ItemCode"))            { cmd.CommandText = "ALTER TABLE Jobs ADD COLUMN ItemCode TEXT"; cmd.ExecuteNonQuery(); }
+        if (!jobCols.Contains("MachineBuildNumber"))  { cmd.CommandText = "ALTER TABLE Jobs ADD COLUMN MachineBuildNumber TEXT"; cmd.ExecuteNonQuery(); }
     }
     // CapacityLedgerEntries migration
     using (var cmd = conn.CreateCommand())

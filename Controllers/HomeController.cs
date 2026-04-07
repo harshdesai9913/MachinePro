@@ -106,7 +106,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? ItemCode, string? DrawingDescription, int Qty)
+    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? ItemCode, string? MachineBuildNumber, string? DrawingDescription, int Qty)
     {
         // Using direct parameters instead of model binding to avoid validation conflicts
         var errors = new List<string>();
@@ -132,6 +132,7 @@ public class HomeController : Controller
             Model = Model!.Trim(),
             Drawing = Drawing!.Trim(),
             ItemCode = ItemCode?.Trim(),
+            MachineBuildNumber = MachineBuildNumber?.Trim(),
             DrawingDescription = DrawingDescription?.Trim(),
             Qty = Qty,
             InwardDate = DateTime.Now.ToString("dd/MM/yyyy")
@@ -864,6 +865,7 @@ public class HomeController : Controller
                 Model = job.Model,
                 Drawing = job.Drawing,
                 ItemCode = job.ItemCode,
+                MachineBuildNumber = job.MachineBuildNumber,
                 DrawingDescription = job.DrawingDescription,
                 Qty = job.Qty,
                 StepIndex = stepIndex,
