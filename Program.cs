@@ -6,6 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 var dbPath = Environment.GetEnvironmentVariable("DB_PATH") ?? "machinepro.db";
+
+// Ensure the directory for the DB file exists (needed for Azure App Service persistent storage)
+var dbDir = Path.GetDirectoryName(Path.GetFullPath(dbPath));
+if (!string.IsNullOrEmpty(dbDir))
+    Directory.CreateDirectory(dbDir);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
@@ -99,5 +104,4 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Run($"http://0.0.0.0:{port}");
+app.Run();
