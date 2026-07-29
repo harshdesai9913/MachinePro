@@ -1,5 +1,8 @@
 @model TrackerViewModel
-@{ ViewData["Title"] = "PRODUCTION TRACKER"; }
+@{
+    ViewData["Title"] = "PRODUCTION TRACKER";
+    var machineCenters = new[] { "VMC", "Milling", "Lathe", "Shaper", "Fabrication" };
+}
 
 <div class="table-wrap">
     <div class="table-header">
@@ -44,14 +47,30 @@
                             {
                                 @foreach (var chip in row.Chips)
                                 {
-                                    <span class="chip @(chip.IsDone ? "chip-green" : "chip-red")" style="margin-right:4px"
-                                          title="@(chip.IsDone ? "Done" : $"Remaining: {chip.RemainingQty}")">
-                                        @chip.Name
-                                        @if (!chip.IsDone && chip.RemainingQty > 0)
-                                        {
-                                            <span style="font-size:.6rem;opacity:.8"> (@chip.RemainingQty)</span>
-                                        }
-                                    </span>
+                                    var statusText = chip.IsDone ? "Done" : $"Remaining: {chip.RemainingQty}";
+                                    if (machineCenters.Contains(chip.Name))
+                                    {
+                                        <a class="chip chip-link @(chip.IsDone ? "chip-green" : "chip-red")" style="margin-right:4px"
+                                           href="@Url.Action("Module", "Home", new { name = chip.Name })"
+                                           title="Open @chip.Name Machine Center — @statusText">
+                                            @chip.Name
+                                            @if (!chip.IsDone && chip.RemainingQty > 0)
+                                            {
+                                                <span style="font-size:.6rem;opacity:.8"> (@chip.RemainingQty)</span>
+                                            }
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="chip @(chip.IsDone ? "chip-green" : "chip-red")" style="margin-right:4px"
+                                              title="@statusText">
+                                            @chip.Name
+                                            @if (!chip.IsDone && chip.RemainingQty > 0)
+                                            {
+                                                <span style="font-size:.6rem;opacity:.8"> (@chip.RemainingQty)</span>
+                                            }
+                                        </span>
+                                    }
                                 }
                             }
                             else
