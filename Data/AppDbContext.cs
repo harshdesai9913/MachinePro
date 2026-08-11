@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<ModelMaster> ModelMasters => Set<ModelMaster>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<CapacityLedgerEntry> CapacityLedgerEntries => Set<CapacityLedgerEntry>();
+    public DbSet<MachineFileEntry> MachineFileEntries => Set<MachineFileEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -36,7 +36,7 @@ public class ModuleJobRow
     public string Model { get; set; } = string.Empty;
     public string Drawing { get; set; } = string.Empty;
     public string? ItemCode { get; set; }
-    public string? MachineBuildNumber { get; set; }
+    public string? OrderNumber { get; set; }
     public string? DrawingDescription { get; set; }
     public int Qty { get; set; }
     public int StepIndex { get; set; }
@@ -152,6 +152,65 @@ public class AddCustomerModel
 public class AddModelModel
 {
     public string ModelName { get; set; } = string.Empty;
+}
+
+// ─── MACHINE FILE INDEX ───
+public class MachineFileIndexViewModel
+{
+    public List<MachineFileIndexRow> Rows { get; set; } = new();
+    public List<CustomerMaster> Customers { get; set; } = new();
+    public List<ModelMaster> Models { get; set; } = new();
+    public string? Search { get; set; }
+    public string? FilterOrder { get; set; }
+    public string? FilterStatus { get; set; }     // Finished / InProduction / NotFound
+    public List<string> AvailableOrders { get; set; } = new();
+    public string Today { get; set; } = string.Empty;
+
+    public int TotalCount => Rows.Count;
+    public int FinishedCount => Rows.Count(r => r.Status == MachineFileStatus.Finished);
+    public int InProductionCount => Rows.Count(r => r.Status == MachineFileStatus.InProduction);
+    public int NotFoundCount => Rows.Count(r => r.Status == MachineFileStatus.NotFound);
+}
+
+public enum MachineFileStatus
+{
+    NotFound,       // no matching order + drawing in the tracker at all
+    InProduction,   // matched, still running
+    Finished        // matched and every matching job is completed
+}
+
+public class MachineFileIndexRow
+{
+    public MachineFileEntry Entry { get; set; } = null!;
+    public MachineFileStatus Status { get; set; }
+    public List<string> Serials { get; set; } = new();
+    public int TrackerQty { get; set; }         // total qty of matching jobs
+    public int CompletedQty { get; set; }       // pieces that cleared every process step
+    public string? CompletedDate { get; set; }  // latest completion date among matched jobs
+
+    public string StatusLabel => Status switch
+    {
+        MachineFileStatus.Finished => "FINISHED",
+        MachineFileStatus.InProduction => "IN PRODUCTION",
+        _ => "NOT IN TRACKER"
+    };
+
+    public string StatusCss => Status switch
+    {
+        MachineFileStatus.Finished => "chip chip-green",
+        MachineFileStatus.InProduction => "chip chip-amber",
+        _ => "chip chip-grey"
+    };
+}
+
+public class AddMachineFileEntryModel
+{
+    public string OrderNumber { get; set; } = string.Empty;
+    public string Customer { get; set; } = string.Empty;
+    public string ModelNo { get; set; } = string.Empty;
+    public string DrawingNo { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+    public string? Remarks { get; set; }
 }
 
 // ─── CAPACITY LEDGER ───

@@ -18,6 +18,9 @@
     --green: #43cc76;
     --green-bg: rgba(67,204,118,.1);
     --green-border: rgba(67,204,118,.3);
+    --amber: #E89D33;
+    --amber-bg: rgba(232,157,51,.14);
+    --amber-border: rgba(232,157,51,.45);
     --font-mono: 'JetBrains Mono', monospace;
     --font-sans: 'IBM Plex Sans', sans-serif;
     --font-display: 'IBM Plex Sans', sans-serif;
@@ -113,6 +116,8 @@ select option { background: var(--surface); color: var(--text); }
 .chip { display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: .62rem; font-weight: 600; font-family: var(--font-mono); letter-spacing: .5px; }
 .chip-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
 .chip-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.chip-amber { background: var(--amber-bg); color: #8a5a00; border: 1px solid var(--amber-border); }
+.chip-grey { background: var(--surface3); color: var(--text3); border: 1px solid var(--border2); }
 a.chip-link { text-decoration: none; cursor: pointer; transition: filter .12s ease, transform .12s ease; }
 a.chip-link:hover { filter: brightness(1.25); transform: translateY(-1px); }
 a.chip-link:active { transform: translateY(0); }

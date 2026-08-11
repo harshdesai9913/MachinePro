@@ -31,12 +31,12 @@
     <div class="table-scroll">
         <table>
             <thead>
-                <tr><th>Serial</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Inward Date</th><th>Completed Date</th>@if(User.IsInRole("Manager")){<th>Action</th>}</tr>
+                <tr><th>Serial</th><th>Order #</th><th>Customer</th><th>Model</th><th>Drawing</th><th>Item Code</th><th>Description</th><th>Qty</th><th>Inward Date</th><th>Completed Date</th>@if(User.IsInRole("Manager")){<th>Action</th>}</tr>
             </thead>
             <tbody>
                 @if (!Model.Jobs.Any())
                 {
-                    <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:30px">No finished jobs yet.</td></tr>
+                    <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:30px">No finished jobs yet.</td></tr>
                 }
                 else
                 {
@@ -44,6 +44,7 @@
                     {
                         <tr class="row-green">
                             <td class="serial-cell">@j.Serial</td>
+                            <td style="font-family:var(--font-mono);font-size:.78rem">@(j.OrderNumber ?? "—")</td>
                             <td>@j.Customer</td>
                             <td>@j.Model</td>
                             <td>@j.Drawing</td>

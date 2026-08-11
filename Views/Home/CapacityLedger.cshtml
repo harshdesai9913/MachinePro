@@ -81,7 +81,7 @@
                     <th>Serial</th>
                     <th>Customer</th>
                     <th>Model</th>
-                    <th>Machine Build #</th>
+                    <th>Order #</th>
                     <th>Module</th>
                     <th>Machine</th>
                     <th>Qty Produced</th>
@@ -101,7 +101,7 @@
                         <td class="serial-cell">@e.Serial</td>
                         <td>@e.Customer</td>
                         <td style="font-size:.78rem">@e.Model</td>
-                        <td style="font-family:var(--font-mono);font-size:.78rem;color:var(--orange)">@(string.IsNullOrEmpty(e.MachineBuildNumber) ? "—" : e.MachineBuildNumber)</td>
+                        <td style="font-family:var(--font-mono);font-size:.78rem;color:var(--white)">@(string.IsNullOrEmpty(e.OrderNumber) ? "—" : e.OrderNumber)</td>
                         <td><span style="font-family:var(--font-mono);font-size:.75rem;background:var(--surface2);padding:2px 8px;border-radius:var(--radius);border:1px solid var(--border)">@e.ModuleName</span></td>
                         <td style="font-family:var(--font-mono);font-size:.78rem">@(string.IsNullOrEmpty(e.MachineNumber) ? "—" : $"#{e.MachineNumber}")</td>
                         <td style="font-family:var(--font-mono);font-weight:600;color:var(--accent)">@e.QtyProduced</td>

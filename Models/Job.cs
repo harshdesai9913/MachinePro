@@ -44,7 +44,7 @@ public class Job
 
     public string? ItemCode { get; set; }
 
-    public string? MachineBuildNumber { get; set; }
+    public string? OrderNumber { get; set; }
 
     public string? DrawingDescription { get; set; }
 
@@ -113,6 +113,23 @@ public class Job
         }
         return true;
     }
+
+    // Pieces that have cleared every process step — the bottleneck step decides.
+    public int GetCompletedPieces()
+    {
+        if (IsCompleted) return Qty;
+
+        var procs = GetProcesses().Where(p => p != "Other").ToList();
+        if (!procs.Any()) return 0;
+
+        var min = int.MaxValue;
+        foreach (var p in procs)
+        {
+            var entry = ModuleEntries.FirstOrDefault(e => e.ModuleName == p);
+            min = Math.Min(min, entry?.FinishedQty ?? 0);
+        }
+        return min == int.MaxValue ? 0 : min;
+    }
 }
 
 public class ModuleEntry
@@ -159,10 +176,38 @@ public class CapacityLedgerEntry
     public string Model { get; set; } = string.Empty;
     public string ModuleName { get; set; } = string.Empty;  // VMC, Milling, Lathe, Shaper
     public string? MachineNumber { get; set; }
-    public string? MachineBuildNumber { get; set; }
+    public string? OrderNumber { get; set; }
     public int QtyProduced { get; set; }
     public string? Notes { get; set; }
     public string EnteredBy { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+}
+
+// ─── MACHINE FILE INDEX (technician-uploaded drawing list per order) ───
+public class MachineFileEntry
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required]
+    public string OrderNumber { get; set; } = string.Empty;
+
+    [Required]
+    public string Customer { get; set; } = string.Empty;
+
+    [Required]
+    public string ModelNo { get; set; } = string.Empty;
+
+    [Required]
+    public string DrawingNo { get; set; } = string.Empty;
+
+    [Required]
+    public int Quantity { get; set; }
+
+    public string? Remarks { get; set; }
+
+    public string UploadedBy { get; set; } = string.Empty;
+    public string UploadedDate { get; set; } = string.Empty;   // dd/MM/yyyy
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
 

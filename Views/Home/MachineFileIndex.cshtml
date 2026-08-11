@@ -1,0 +1,185 @@
+@model MachineFileIndexViewModel
+@{
+    ViewData["Title"] = "MACHINE FILE INDEX";
+    var successMsg = TempData["Success"] as string;
+    var isManager = User.IsInRole("Manager");
+    var colSpan = isManager ? 11 : 10;
+}
+
+@if (!string.IsNullOrEmpty(successMsg))
+{
+    <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:16px;color:var(--green);font-size:.85rem;font-weight:600;font-family:var(--font-mono)">✓ @successMsg</div>
+}
+
+<!-- SUMMARY -->
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="label">Indexed Drawings</div>
+        <div class="value">@Model.TotalCount</div>
+        <div class="sub">@Model.AvailableOrders.Count order(s)</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Finished</div>
+        <div class="value" style="color:var(--green)">@Model.FinishedCount</div>
+        <div class="sub">Completed in Production Tracker</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">In Production</div>
+        <div class="value">@Model.InProductionCount</div>
+        <div class="sub">Matched but still running</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Not in Tracker</div>
+        <div class="value" style="color:var(--text3)">@Model.NotFoundCount</div>
+        <div class="sub">No order + drawing match yet</div>
+    </div>
+</div>
+
+<!-- CSV UPLOAD -->
+<div class="table-wrap" style="padding:10px 16px;margin:12px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--white);letter-spacing:1px;white-space:nowrap">UPLOAD INDEX CSV</span>
+    <form method="post" asp-action="UploadMachineFileCsv" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px">
+        <input type="file" name="csvFile" accept=".csv" required
+               style="font-size:.7rem;font-family:var(--font-mono);color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:3px 6px" />
+        <button type="submit" class="btn btn-primary btn-sm" style="font-size:.7rem;padding:3px 8px">Upload</button>
+    </form>
+    <span style="font-size:.65rem;color:var(--text3);font-family:var(--font-mono)">Columns: Order Number · Customer · Model No. · Dwg No. · Quantity · Remarks</span>
+    <a href="@Url.Action("ExportMachineFileIndexCsv", "Home")" class="btn btn-sm" style="font-size:.7rem;margin-left:auto">↓ Export</a>
+</div>
+
+<!-- MANUAL ENTRY -->
+<div class="table-wrap" style="padding:20px;margin-bottom:12px">
+    <h2 style="font-family:var(--font-mono);font-size:.9rem;color:var(--white);margin-bottom:16px;letter-spacing:1px">ADD DRAWING TO INDEX</h2>
+    <form method="post" asp-action="AddMachineFileEntry">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Order Number</label>
+                <input name="OrderNumber" placeholder="e.g. ORD-1834" required />
+            </div>
+            <div class="form-group">
+                <label>Customer</label>
+                <input name="Customer" list="mfi-customers" placeholder="e.g. Tata Motors" required />
+                <datalist id="mfi-customers">
+                    @foreach (var c in Model.Customers)
+                    {
+                        <option value="@c.CustomerName"></option>
+                    }
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label>Model No.</label>
+                <input name="ModelNo" list="mfi-models" placeholder="e.g. TM-400X" required />
+                <datalist id="mfi-models">
+                    @foreach (var m in Model.Models)
+                    {
+                        <option value="@m.ModelName"></option>
+                    }
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label>Dwg No.</label>
+                <input name="DrawingNo" placeholder="e.g. DWG-2201" required />
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input name="Quantity" type="number" min="1" placeholder="e.g. 12" required />
+            </div>
+            <div class="form-group">
+                <label>Remarks</label>
+                <input name="Remarks" placeholder="optional" />
+            </div>
+            <div class="form-group">
+                <label>Uploaded Date</label>
+                <input value="@Model.Today" readonly />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add to Index</button>
+    </form>
+</div>
+
+<!-- INDEX TABLE -->
+<div class="table-wrap">
+    <div class="table-header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <h2>FILE INDEX</h2>
+            <span class="count">@Model.Rows.Count entries</span>
+        </div>
+        <form method="get" asp-action="MachineFileIndex" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <select name="filterOrder" onchange="this.form.submit()"
+                    style="padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.75rem;font-family:var(--font-mono)">
+                <option value="">All Orders</option>
+                @foreach (var o in Model.AvailableOrders)
+                {
+                    <option value="@o" selected="@(Model.FilterOrder == o)">@o</option>
+                }
+            </select>
+            <select name="filterStatus" onchange="this.form.submit()"
+                    style="padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.75rem;font-family:var(--font-mono)">
+                <option value="">All Status</option>
+                <option value="Finished" selected="@(Model.FilterStatus == "Finished")">Finished</option>
+                <option value="InProduction" selected="@(Model.FilterStatus == "InProduction")">In Production</option>
+                <option value="NotFound" selected="@(Model.FilterStatus == "NotFound")">Not in Tracker</option>
+            </select>
+            <input class="search-input" name="search" placeholder="Search order / dwg..." value="@Model.Search" />
+        </form>
+    </div>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order #</th><th>Customer</th><th>Model No.</th><th>Dwg No.</th><th>Qty</th>
+                    <th>Finished?</th><th>Done / Qty</th><th>Tracker Serial</th><th>Completed On</th><th>Uploaded By</th>
+                    @if (isManager) { <th style="width:80px">Action</th> }
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Rows.Any())
+                {
+                    <tr><td colspan="@colSpan" style="text-align:center;color:var(--text3);padding:30px">No drawings indexed yet. Upload a CSV or add one above.</td></tr>
+                }
+                else
+                {
+                    @foreach (var r in Model.Rows)
+                    {
+                        <tr class="@(r.Status == MachineFileStatus.Finished ? "row-green" : "")">
+                            <td style="font-family:var(--font-mono);font-size:.78rem;font-weight:600">@r.Entry.OrderNumber</td>
+                            <td>@r.Entry.Customer</td>
+                            <td>@r.Entry.ModelNo</td>
+                            <td style="font-family:var(--font-mono);font-size:.78rem">@r.Entry.DrawingNo</td>
+                            <td>@r.Entry.Quantity</td>
+                            <td><span class="@r.StatusCss">@r.StatusLabel</span></td>
+                            <td style="font-family:var(--font-mono);font-size:.75rem">
+                                @if (r.Status == MachineFileStatus.NotFound)
+                                {
+                                    <span style="color:var(--text3)">—</span>
+                                }
+                                else
+                                {
+                                    @($"{r.CompletedQty}/{r.TrackerQty}")
+                                }
+                            </td>
+                            <td style="font-family:var(--font-mono);font-size:.75rem">@(r.Serials.Any() ? string.Join(" / ", r.Serials) : "—")</td>
+                            <td class="finished-date">@(r.CompletedDate ?? "—")</td>
+                            <td style="font-size:.72rem;color:var(--text3)">@r.Entry.UploadedBy<br /><span style="font-size:.65rem">@r.Entry.UploadedDate</span></td>
+                            @if (isManager)
+                            {
+                                <td>
+                                    <form method="post" asp-action="DeleteMachineFileEntry" style="display:inline">
+                                        <input type="hidden" name="id" value="@r.Entry.Id" />
+                                        <button type="submit" onclick="return confirm('Remove @r.Entry.DrawingNo from order @r.Entry.OrderNumber?')"
+                                                style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-weight:700;font-family:var(--font-mono)">✕ Delete</button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<p style="font-size:.68rem;color:var(--text3);margin-top:10px;font-family:var(--font-mono)">
+    Status is derived live from the Production Tracker by matching <strong>Order Number + Dwg No.</strong> — a drawing turns
+    <span style="color:var(--green)">FINISHED</span> as soon as its job is moved to Finished.
+</p>

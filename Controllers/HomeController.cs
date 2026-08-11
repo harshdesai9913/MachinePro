@@ -106,7 +106,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? ItemCode, string? MachineBuildNumber, string? DrawingDescription, int Qty)
+    public async Task<IActionResult> SubmitRequest(string? Customer, string? Model, string? Drawing, string? ItemCode, string? OrderNumber, string? DrawingDescription, int Qty)
     {
         // Using direct parameters instead of model binding to avoid validation conflicts
         var errors = new List<string>();
@@ -132,7 +132,7 @@ public class HomeController : Controller
             Model = Model!.Trim(),
             Drawing = Drawing!.Trim(),
             ItemCode = ItemCode?.Trim(),
-            MachineBuildNumber = MachineBuildNumber?.Trim(),
+            OrderNumber = OrderNumber?.Trim(),
             DrawingDescription = DrawingDescription?.Trim(),
             Qty = Qty,
             InwardDate = DateTime.Now.ToString("dd/MM/yyyy")
@@ -170,7 +170,7 @@ public class HomeController : Controller
 
         // Parse header row to find column indices
         var headers = ParseCsvRow(lines[0]);
-        int idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxItemCode = -1, idxDesc = -1, idxQty = -1;
+        int idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxItemCode = -1, idxDesc = -1, idxQty = -1, idxOrder = -1;
         for (int i = 0; i < headers.Count; i++)
         {
             var h = headers[i].ToLowerInvariant().Trim();
@@ -180,6 +180,7 @@ public class HomeController : Controller
             else if (h is "item code" or "itemcode" or "item_code" or "part no" or "part number") idxItemCode = i;
             else if (h is "description" or "drawing description" or "desc") idxDesc = i;
             else if (h is "qty" or "quantity") idxQty = i;
+            else if (h is "order" or "order no" or "order no." or "order number" or "ordernumber" or "order_number") idxOrder = i;
         }
 
         if (idxCustomer < 0 || idxModel < 0 || idxDrawing < 0 || idxQty < 0)
@@ -201,6 +202,7 @@ public class HomeController : Controller
             var drawing   = idxDrawing   < cols.Count ? cols[idxDrawing].Trim()   : "";
             var itemCode  = idxItemCode >= 0 && idxItemCode < cols.Count ? cols[idxItemCode].Trim() : null;
             var desc      = idxDesc >= 0 && idxDesc < cols.Count ? cols[idxDesc].Trim() : null;
+            var orderNo   = idxOrder >= 0 && idxOrder < cols.Count ? cols[idxOrder].Trim() : null;
             var qtyStr   = idxQty      < cols.Count ? cols[idxQty].Trim()      : "";
 
             if (string.IsNullOrEmpty(customer) || string.IsNullOrEmpty(model) ||
@@ -220,6 +222,7 @@ public class HomeController : Controller
                 Model = model,
                 Drawing = drawing,
                 ItemCode = string.IsNullOrEmpty(itemCode) ? null : itemCode,
+                OrderNumber = string.IsNullOrEmpty(orderNo) ? null : orderNo,
                 DrawingDescription = string.IsNullOrEmpty(desc) ? null : desc,
                 Qty = qty,
                 InwardDate = today
@@ -618,10 +621,10 @@ public class HomeController : Controller
     public async Task<IActionResult> ExportCsv()
     {
         var jobs = await _db.Jobs.ToListAsync();
-        var csv = "Serial,Customer,Model,Drawing,Item Code,Description,Qty,Date,Process1,Process2,Process3,Process4,Process5\n";
+        var csv = "Serial,Order No,Customer,Model,Drawing,Item Code,Description,Qty,Date,Process1,Process2,Process3,Process4,Process5\n";
         foreach (var j in jobs)
         {
-            csv += $"{j.Serial},\"{j.Customer}\",\"{j.Model}\",\"{j.Drawing}\",\"{j.ItemCode}\",\"{j.DrawingDescription}\",{j.Qty},{j.InwardDate},{j.Process1},{j.Process2},{j.Process3},{j.Process4},{j.Process5}\n";
+            csv += $"{j.Serial},\"{j.OrderNumber}\",\"{j.Customer}\",\"{j.Model}\",\"{j.Drawing}\",\"{j.ItemCode}\",\"{j.DrawingDescription}\",{j.Qty},{j.InwardDate},{j.Process1},{j.Process2},{j.Process3},{j.Process4},{j.Process5}\n";
         }
         return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "production_data.csv");
     }
@@ -830,6 +833,271 @@ public class HomeController : Controller
         return RedirectToAction("MasterData");
     }
 
+    // ─── MACHINE FILE INDEX ───
+    // Technicians upload the drawing list for an order; the status column is derived
+    // live from the Production Tracker by matching Order No. + Drawing No.
+    public async Task<IActionResult> MachineFileIndex(string? search, string? filterOrder, string? filterStatus)
+    {
+        var entries = await _db.MachineFileEntries
+            .OrderBy(e => e.OrderNumber)
+            .ThenBy(e => e.DrawingNo)
+            .ToListAsync();
+
+        var jobs = await _db.Jobs.Include(j => j.ModuleEntries).ToListAsync();
+
+        // Index every job by "ordernumber|drawing" (case/space insensitive) for O(1) lookup
+        var jobLookup = jobs
+            .Where(j => !string.IsNullOrWhiteSpace(j.OrderNumber))
+            .GroupBy(j => MatchKey(j.OrderNumber, j.Drawing))
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var rows = entries.Select(e =>
+        {
+            var row = new MachineFileIndexRow { Entry = e };
+
+            if (jobLookup.TryGetValue(MatchKey(e.OrderNumber, e.DrawingNo), out var matched) && matched.Any())
+            {
+                row.Serials = matched.Select(j => j.Serial).OrderBy(s => s).ToList();
+                row.TrackerQty = matched.Sum(j => j.Qty);
+                row.CompletedQty = matched.Sum(j => j.GetCompletedPieces());
+                row.Status = matched.All(j => j.IsCompleted)
+                    ? MachineFileStatus.Finished
+                    : MachineFileStatus.InProduction;
+                row.CompletedDate = matched
+                    .Where(j => j.IsCompleted && !string.IsNullOrEmpty(j.CompletedDate))
+                    .Select(j => j.CompletedDate!)
+                    .OrderByDescending(d => ParseDate(d))
+                    .FirstOrDefault();
+            }
+            else
+            {
+                row.Status = MachineFileStatus.NotFound;
+            }
+
+            return row;
+        }).ToList();
+
+        if (!string.IsNullOrWhiteSpace(filterOrder))
+            rows = rows.Where(r => r.Entry.OrderNumber == filterOrder).ToList();
+
+        if (!string.IsNullOrWhiteSpace(filterStatus) &&
+            Enum.TryParse<MachineFileStatus>(filterStatus, out var wanted))
+            rows = rows.Where(r => r.Status == wanted).ToList();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLowerInvariant();
+            rows = rows.Where(r =>
+                r.Entry.OrderNumber.ToLowerInvariant().Contains(s) ||
+                r.Entry.Customer.ToLowerInvariant().Contains(s) ||
+                r.Entry.ModelNo.ToLowerInvariant().Contains(s) ||
+                r.Entry.DrawingNo.ToLowerInvariant().Contains(s)
+            ).ToList();
+        }
+
+        var vm = new MachineFileIndexViewModel
+        {
+            Rows = rows,
+            Customers = await _db.CustomerMasters.OrderBy(c => c.CustomerName).ToListAsync(),
+            Models = await _db.ModelMasters.OrderBy(m => m.ModelName).ToListAsync(),
+            Search = search,
+            FilterOrder = filterOrder,
+            FilterStatus = filterStatus,
+            AvailableOrders = entries.Select(e => e.OrderNumber).Distinct().OrderBy(o => o).ToList(),
+            Today = DateTime.Now.ToString("dd/MM/yyyy")
+        };
+
+        ViewBag.CurrentPage = "machinefileindex";
+        return View(vm);
+    }
+
+    private static string MatchKey(string? orderNumber, string? drawing) =>
+        $"{(orderNumber ?? "").Trim().ToLowerInvariant()}|{(drawing ?? "").Trim().ToLowerInvariant()}";
+
+    private static DateTime ParseDate(string ddMMyyyy) =>
+        DateTime.TryParseExact(ddMMyyyy, "dd/MM/yyyy", null,
+            System.Globalization.DateTimeStyles.None, out var dt) ? dt : DateTime.MinValue;
+
+    [HttpPost]
+    public async Task<IActionResult> AddMachineFileEntry(AddMachineFileEntryModel model)
+    {
+        var errors = new List<string>();
+        if (string.IsNullOrWhiteSpace(model.OrderNumber)) errors.Add("Order Number");
+        if (string.IsNullOrWhiteSpace(model.Customer)) errors.Add("Customer");
+        if (string.IsNullOrWhiteSpace(model.ModelNo)) errors.Add("Model No.");
+        if (string.IsNullOrWhiteSpace(model.DrawingNo)) errors.Add("Dwg No.");
+        if (model.Quantity <= 0) errors.Add("Quantity");
+
+        if (errors.Any())
+        {
+            TempData["Error"] = $"Please fill in: {string.Join(", ", errors)}";
+            return RedirectToAction("MachineFileIndex");
+        }
+
+        var orderNo = model.OrderNumber.Trim();
+        var drawingNo = model.DrawingNo.Trim();
+
+        var duplicate = await _db.MachineFileEntries
+            .AnyAsync(e => e.OrderNumber.ToLower() == orderNo.ToLower()
+                        && e.DrawingNo.ToLower() == drawingNo.ToLower());
+        if (duplicate)
+        {
+            TempData["Error"] = $"Drawing {drawingNo} is already indexed for order {orderNo}.";
+            return RedirectToAction("MachineFileIndex");
+        }
+
+        _db.MachineFileEntries.Add(new MachineFileEntry
+        {
+            OrderNumber = orderNo,
+            Customer = model.Customer.Trim(),
+            ModelNo = model.ModelNo.Trim(),
+            DrawingNo = drawingNo,
+            Quantity = model.Quantity,
+            Remarks = string.IsNullOrWhiteSpace(model.Remarks) ? null : model.Remarks.Trim(),
+            UploadedBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
+            UploadedDate = DateTime.Now.ToString("dd/MM/yyyy"),
+            CreatedAt = DateTime.Now
+        });
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = $"Added {drawingNo} to the file index for order {orderNo}.";
+        return RedirectToAction("MachineFileIndex");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UploadMachineFileCsv(IFormFile? csvFile)
+    {
+        if (csvFile == null || csvFile.Length == 0)
+        {
+            TempData["Error"] = "Please select a CSV file.";
+            return RedirectToAction("MachineFileIndex");
+        }
+
+        var lines = new List<string>();
+        using (var reader = new StreamReader(csvFile.OpenReadStream()))
+        {
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (line != null) lines.Add(line);
+            }
+        }
+
+        if (lines.Count < 2)
+        {
+            TempData["Error"] = "CSV file must have a header row and at least one data row.";
+            return RedirectToAction("MachineFileIndex");
+        }
+
+        var headers = ParseCsvRow(lines[0]);
+        int idxOrder = -1, idxCustomer = -1, idxModel = -1, idxDrawing = -1, idxQty = -1, idxRemarks = -1;
+        for (int i = 0; i < headers.Count; i++)
+        {
+            var h = headers[i].ToLowerInvariant().Trim();
+            if (h is "order" or "order no" or "order no." or "order number" or "ordernumber" or "order_number") idxOrder = i;
+            else if (h is "customer" or "customer name") idxCustomer = i;
+            else if (h is "model" or "model no" or "model no." or "model number" or "machine model" or "customer model") idxModel = i;
+            else if (h is "dwg" or "dwg no" or "dwg no." or "drawing" or "drawing no" or "drawing no." or "drawing number") idxDrawing = i;
+            else if (h is "qty" or "quantity") idxQty = i;
+            else if (h is "remarks" or "remark" or "notes" or "note") idxRemarks = i;
+        }
+
+        if (idxOrder < 0 || idxCustomer < 0 || idxModel < 0 || idxDrawing < 0 || idxQty < 0)
+        {
+            TempData["Error"] = "CSV must have columns: Order Number, Customer, Model No., Dwg No., Quantity (Remarks optional).";
+            return RedirectToAction("MachineFileIndex");
+        }
+
+        var existingKeys = (await _db.MachineFileEntries.ToListAsync())
+            .Select(e => MatchKey(e.OrderNumber, e.DrawingNo))
+            .ToHashSet();
+
+        var uploadedBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown";
+        var today = DateTime.Now.ToString("dd/MM/yyyy");
+        int imported = 0, duplicates = 0, skipped = 0;
+
+        for (int r = 1; r < lines.Count; r++)
+        {
+            if (string.IsNullOrWhiteSpace(lines[r])) continue;
+            var cols = ParseCsvRow(lines[r]);
+
+            var orderNo  = idxOrder    < cols.Count ? cols[idxOrder].Trim()    : "";
+            var customer = idxCustomer < cols.Count ? cols[idxCustomer].Trim() : "";
+            var modelNo  = idxModel    < cols.Count ? cols[idxModel].Trim()    : "";
+            var drawing  = idxDrawing  < cols.Count ? cols[idxDrawing].Trim()  : "";
+            var qtyStr   = idxQty      < cols.Count ? cols[idxQty].Trim()      : "";
+            var remarks  = idxRemarks >= 0 && idxRemarks < cols.Count ? cols[idxRemarks].Trim() : null;
+
+            if (string.IsNullOrEmpty(orderNo) || string.IsNullOrEmpty(customer) ||
+                string.IsNullOrEmpty(modelNo) || string.IsNullOrEmpty(drawing) ||
+                !int.TryParse(qtyStr, out int qty) || qty <= 0)
+            {
+                skipped++;
+                continue;
+            }
+
+            var key = MatchKey(orderNo, drawing);
+            if (!existingKeys.Add(key))
+            {
+                duplicates++;
+                continue;
+            }
+
+            _db.MachineFileEntries.Add(new MachineFileEntry
+            {
+                OrderNumber = orderNo,
+                Customer = customer,
+                ModelNo = modelNo,
+                DrawingNo = drawing,
+                Quantity = qty,
+                Remarks = string.IsNullOrEmpty(remarks) ? null : remarks,
+                UploadedBy = uploadedBy,
+                UploadedDate = today,
+                CreatedAt = DateTime.Now
+            });
+            imported++;
+        }
+
+        await _db.SaveChangesAsync();
+
+        var msg = $"Imported {imported} drawing(s) into the Machine File Index.";
+        if (duplicates > 0) msg += $" {duplicates} already indexed (skipped).";
+        if (skipped > 0) msg += $" {skipped} row(s) skipped due to missing/invalid data.";
+        TempData["Success"] = msg;
+        return RedirectToAction("MachineFileIndex");
+    }
+
+    [Authorize(Roles = "Manager")]
+    [HttpPost]
+    public async Task<IActionResult> DeleteMachineFileEntry(int id)
+    {
+        var entry = await _db.MachineFileEntries.FindAsync(id);
+        if (entry != null)
+        {
+            _db.MachineFileEntries.Remove(entry);
+            await _db.SaveChangesAsync();
+        }
+        return RedirectToAction("MachineFileIndex");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportMachineFileIndexCsv()
+    {
+        var result = await MachineFileIndex(null, null, null) as ViewResult;
+        var vm = result?.Model as MachineFileIndexViewModel ?? new MachineFileIndexViewModel();
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Order No,Customer,Model No,Dwg No,Quantity,Status,Tracker Serials,Completed Qty,Completed Date,Remarks,Uploaded By,Uploaded Date");
+        foreach (var r in vm.Rows)
+        {
+            sb.AppendLine($"\"{r.Entry.OrderNumber}\",\"{r.Entry.Customer}\",\"{r.Entry.ModelNo}\",\"{r.Entry.DrawingNo}\",{r.Entry.Quantity}," +
+                          $"\"{r.StatusLabel}\",\"{string.Join(" / ", r.Serials)}\",{r.CompletedQty},\"{r.CompletedDate}\"," +
+                          $"\"{r.Entry.Remarks}\",\"{r.Entry.UploadedBy}\",\"{r.Entry.UploadedDate}\"");
+        }
+
+        return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "machine_file_index.csv");
+    }
+
     // ─── MACHINE MODULES ───
     public async Task<IActionResult> Module(string name, string? filterCustomer, string? filterModel)
     {
@@ -876,7 +1144,7 @@ public class HomeController : Controller
                 Model = job.Model,
                 Drawing = job.Drawing,
                 ItemCode = job.ItemCode,
-                MachineBuildNumber = job.MachineBuildNumber,
+                OrderNumber = job.OrderNumber,
                 DrawingDescription = job.DrawingDescription,
                 Qty = job.Qty,
                 StepIndex = stepIndex,
@@ -996,7 +1264,7 @@ public class HomeController : Controller
             Model = job.Model,
             ModuleName = ModuleName,
             MachineNumber = entry.MachineNumber,
-            MachineBuildNumber = job.MachineBuildNumber,
+            OrderNumber = job.OrderNumber,
             QtyProduced = RecordQty,
             EnteredBy = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Unknown",
             CreatedAt = DateTime.Now
